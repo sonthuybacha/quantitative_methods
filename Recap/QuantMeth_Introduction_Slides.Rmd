@@ -1,6 +1,6 @@
 ---
 title: 'Recap statistics'
-author: "Cornelius Senf"
+author: "Dr. Cornelius Senf"
 date: "cornelius.senf@geo.hu-berlin.de"
 output:
   ioslides_presentation:
@@ -17,10 +17,11 @@ library(gridExtra)
 
 ## Syllabus
 
-We will today recap the following topics, which should be known to successfully participate in the module **Quantitative Methods**:
+We will recap the following topics, which should be known to successfully participate in the module **Quantitative Methods**:
 
 - Probability
 - Random variable, sample, and sampling
+- Parameter estimation
 - Probability distributions
 - Null hypothesis significance testing
 - Correlation
@@ -33,7 +34,7 @@ Probability is a measure of the likelihood that an event $a$ will occur, given a
 
 $P(a) = \frac{\text{Count of a}}{\text{Count of A}}$
 
-**Example:** The probability of getting a six when wolling a dice once is 1/6.
+**Example:** The probability of getting a six when rolling a dice once is $P(6) = 1/6$.
 
 ## Probability
 
@@ -41,15 +42,15 @@ We can also calculate the probability that event $a$ or event $b$ will occur, gi
 
 $P(a \cap b) = P(a) + P(b)$
 
-**Example:** The probability of getting a six or a three when wolling a dice once is 1/6 + 1/6 = 1/3
+**Example:** The probability of getting a six or a three when wolling a dice once is $P(6  3) = P(6) + (6) = 1/6 + 1/6 = 1/3$
 
 ## Probability
 
-When interested in the probability that event $a$ will occur and then event $b$, given that the events are independent, we calculate the probability by multiplying the individual probabilities:
+When we are interested in the probability that event $a$ will occur followed by event $b$, given the events are independent, we calculate the probability by multiplying the individual probabilities:
 
 $P(a \cup b) = P(a) * P(b)$
 
-**Example:** The probability of getting two times a six when rolling a dice two times is 1/6 * 1/6 = 1/36
+**Example:** The probability of getting two times a six when rolling a dice two times is $P(6 \cup 6) = P(6) * P(6) = 1/6 * 1/6 = 1/36$
 
 ## Conditional probabilities
 
@@ -77,7 +78,7 @@ We can easily represent all possible events in a contingency-table:
 
 ## Contingency-table
 
-Die nun berechneten Wahrscheinlichkeiten sind:
+The probabilities of each event are:
 
  |         | Red | Blue | Sum   |
  |---------|-----|------|-------|
@@ -87,7 +88,7 @@ Die nun berechneten Wahrscheinlichkeiten sind:
 
 ## Conditional probability
 
-While drawing a ball from the urn, we already feel that the ball is made of wood What is the probability it is of red color?
+While drawing a ball from the urn, we already feel that the ball is made of wood. What is the probability that it is red in color? Easy to calculate using the rule of conditional probabilities:
 
 $P(R|W) = \frac{P(R \cap W)}{P(W)} = \frac{\frac{4}{30}}{\frac{1}{3}} = 0.8$
 
@@ -97,13 +98,13 @@ $P(R|W) = \frac{P(R \cap W)}{P(W)} = \frac{\frac{4}{30}}{\frac{1}{3}} = 0.8$
 
 A random variable is a variable that can take on a set of possible values, each with an distinct probability.
 
-**Example:** The random variable 'age' can take any value between 0 and $\infty$, though a value of 35 is more likely than a value of 110. 
+**Example:** The random variable 'age' can take any value between 0 and $\infty$, though picking a random person, it is more likely she is 35 than 110. 
 
 ## Sample
 
-Simply speaking, a sample is a set of data points drawn from a population by a defined procedure. Mathematically speaking, a sample consists of a set of random variables. Each individual data point thereby represents a realisation of the many possible values of the random variable. The size of a sample is termed $n$.
+Simply speaking, a sample consists of a set of realisations of a random variables. The size of a sample is termed $n$.
 
-**Example:** If I pick one person ($n = 1$) in this class, a realisation of the random variable 'age' might be S = {26}. If I pick three persons ($n = 3$), the realizations might be S = {22, 28, 32}.
+**Example:** If I pick one person ($n = 1$) in this class, a realisation of the random variable 'age' might be $S = \{26\}$. If I pick three persons ($n = 3$), the realizations might be $S = \{22, 28, 32\}$.
 
 ## Sampling
 
@@ -114,11 +115,11 @@ Drawing a sample from a population requires a defined procedure:
 - Stratified sampling
 - Clustered sampling
 
-All those procedures have in common that each data point has a certain probability of inclusion in the sample. We then speak of a probability sampling design. There are also non-probability sampling designs.
+All those procedures have in common that each data point has a well-defined probability of being included in the sample. We then speak of a probability sampling design. There are also non-probability sampling designs.
 
 ## Describing a sample
 
-Suppose that we sampled the DBH (diameter at breast height) of 150 pine trees randomly selected within a given forest.
+Suppose that we sampled the DBH (diameter at breast height) of 150 pine trees randomly selected within a forest in Brandenburg.
 
 We can inspect the sample using a histogram.
 
@@ -141,6 +142,7 @@ The number of classes $k$ (bins) is estimated by: $k=1+log_{2}(n)$.
 - Mode
 - Variance
 - Standard deviation
+- Coefficient of variation
 - Quantiles
 - Interquartile range
 - Skewness
@@ -174,6 +176,200 @@ grid.arrange(
 
 Knowing this curve would allow us to make statements about the forest we took the sample in (i.e., about the underlying population).
 
+## The normal distribution
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+
+x <- seq(-8,8,length.out=10000)
+
+set.seed(667)
+
+d1 <- data.frame(x=x,
+                v1=dnorm(x,mean=0,sd=1),
+                v2=dnorm(x,mean=2,sd=3),
+                v3=dnorm(x,mean=-4,sd=0.5))
+d1 <- melt(d1, id.vars="x")
+d1$variable <- factor(as.character(d1$variable),labels=c("N(0,1)","N(2,3)","N(-4,0.5)"))
+
+ggplot(d1, aes(x=x, y=value, col=variable)) +
+    geom_line() +
+    scale_color_brewer(palette="Set1") +
+    ylab("N(x)")
+```
+
+$N(x) = P(X=x \vert \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi}}e^{\frac{-(x-\mu)^2}{2*\sigma^2}}$
+
+# Parameter estimation
+
+## Statistical inference
+
+Assuming a process to be normal distributed, it would be good to know the mean and variance of that normal distribution. This would allow us to infer about the underlying population. However, the parameters of the normal distributin representing the underlying population are mostly unknown. We hence need to estimate those parameters from the sample.
+
+## Statistical inference
+
+Assuming that the DBH of our sample is normally distributed in the population, we estimate: $\hat{\mu} = \overline{x} = 55.5$ and a $\hat{\sigma^2} = s = 15.7$ and can print the resulting normal distribution.
+
+## Parameter estimation
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+
+dat <- data.frame(DBH = seq(0, 120, length.out = 1000), 
+                  pdf = dnorm(seq(0, 120, length.out = 1000), mean(dbh$DBH), sd = sd(dbh$DBH)), 
+                  cdf = pnorm(seq(0, 120, length.out = 1000), mean(dbh$DBH), sd = sd(dbh$DBH)))
+
+ggplot(dat, aes(x = DBH, y = pdf)) +
+  geom_line()
+
+```
+
+## Sample consistency
+
+A sample is considered consistent if with increasing sample size the estimate approaches the true value (i.e., the estimate gets more accurate). Assume that we drew many samples with increasing sample size from a known population. We could estimate the mean and compare it to the 'true' mean:
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+
+pop <- rnorm(10000, 55, 15)
+
+x <- c()
+
+for (i in seq(10, 10000, 10)) {
+  x <- c(x, mean(sample(pop, i)))
+}
+
+ggplot(data = data.frame(n = seq(10, 10000, 10),
+                         DBH = x), 
+       aes(x = n, y = DBH)) +
+  geom_point() +
+  geom_hline(yintercept = mean(pop), col = "red", linetype = "dashed")
+
+```
+
+## Sample bias
+
+A sample is un-biased when the deviance between the estimated and the expecte value is zero. Assume that we drew 10,000 samples (each n=150) from a known population and estimate the mean for each sample. Following, we calculated the difference between the known 'true' value and the estimate. The result yields following distribution:
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+
+pop <- rnorm(10000, 55, 15)
+
+x <- c()
+
+for (i in 1:10000) {
+  x <- c(x, mean(sample(pop, 150)))
+}
+
+ggplot(data = data.frame(x = x - mean(pop)), 
+       aes(x = x)) +
+  geom_histogram() +
+  geom_vline(xintercept = 0, col = "red", linetype = "dashed") +
+  xlab("Estimate - 'true'")
+
+```
+
+## Sampling variance
+
+The sampling variance indicates how precisely a sample estimate describes the population. Assume again that we drew many more samples from the same population (all with n = 150) and estimate the mean from each of those samples. The distribution of the sample means would look like this:
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+set.seed(667) # One step ahead of the devil!
+dbh_repeat <- replicate(1000000, rnorm(150, 55, 15))
+dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
+ggplot(data.frame(x = dbh_repeat_mean), aes(x = x)) + geom_histogram()
+```
+
+## Sampling variance
+
+We now also take many more samples with n=15 and estimate the mean from each of those samples. The distribution of the sample means for n=15 would look like this:
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=8, fig.align='center'}
+set.seed(667) # One step ahead of the devil!
+
+dbh_repeat <- replicate(1000000, rnorm(150, 55, 15))
+dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
+p1 <- ggplot(data.frame(DBH = dbh_repeat_mean), aes(x = DBH)) + geom_histogram() + xlim(35, 75)
+
+dbh_repeat2 <- replicate(1000000, rnorm(15, 55, 15))
+dbh_repeat2_mean <- apply(dbh_repeat2, 2, mean)
+
+p2 <- ggplot(data.frame(DBH = dbh_repeat2_mean), aes(x = DBH)) + geom_histogram() + xlim(35, 75)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+## Standard errors
+
+This little experiment demonstrated us that we yield slightly different estimates each time we sample from a population! The variation in sampling means depends on the (population) variance and the sample size. We can calculate the variation in sampling means by:
+
+$SE = \frac{s}{\sqrt{n}}$
+
+Which is called the standard error of the sampling mean. Note that increasing the sample size (n) increases precision, independent of the population size!
+
+## Confidence interval
+
+The standard error is normally distributed (following the central limit theorem), which allows us to use a standard normal distribution to calculate the range of sample means included in the central 95% of all sampling means:
+
+$CI_{95\%} = \overline{x} \pm SE * Z$
+
+with:
+
+$Z = \Phi^{-1}(0.975) = 1.96$ and $\Phi \sim N(0, 1)$.
+
+This interval is called the confidence interval. 
+
+## Confidence interval
+
+The confidence interval is a measure of sampling precision, but it's interpretation is a little difficult. Let's start with what the confidence interval can't tell you: The 'true' population mean has a 95% probability being included in the interval.
+
+Instead, the confidence intervall tells you the likelihood of including the 'true' mean when repeating the sampling infinitely.
+
+## Confidence interval
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
+
+dbh_repeat <- replicate(100, rnorm(15, 55, 15))
+dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
+dbh_repeat_sd <- apply(dbh_repeat, 2, sd)
+
+ggplot(data.frame(sample = 1:100, DBH = dbh_repeat_mean, ci = (dbh_repeat_sd / sqrt(15)) * 1.96),
+       aes(x = sample, y = DBH)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = DBH - ci, ymax = DBH + ci)) +
+  geom_hline(yintercept = 55, linetype = "dashed", col = "red") +
+  labs(title = "n = 15") +
+  ylim(30, 80)
+
+```
+
+## Confidence interval
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
+
+dbh_repeat <- replicate(100, rnorm(150, 55, 15))
+dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
+dbh_repeat_sd <- apply(dbh_repeat, 2, sd)
+
+ggplot(data.frame(sample = 1:100, DBH = dbh_repeat_mean, ci = (dbh_repeat_sd / sqrt(150)) * 1.96),
+       aes(x = sample, y = DBH)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = DBH - ci, ymax = DBH + ci)) +
+  geom_hline(yintercept = 55, linetype = "dashed", col = "red") +
+  labs(title = "n = 150") +
+  ylim(30, 80)
+
+```
+
+## Confidence interval
+
+Beware that precision and accuracy are two different things. Your estimate might be very precise, but not accurate. Accuracy hereby is defined as the difference between an estimate and the 'true' value. If there is a systematic difference between the an estimate and the 'true' value, we call this a bias.
+
+## Confidence interval
+
+For our example, the 95% confidence interval is:
+
+$CI_{95\%} = \frac{15.7}{\sqrt{150}} * 1.96 = 2.5$
+
+Hence, when repeating the sampling we would expect a mean DBH of 55.5 $\pm$ 2.5 cm in 95% of the cases.
+
 # Probability distributions
 
 ## Characteristics of probability distributions
@@ -187,124 +383,6 @@ Probability distributions describe the likelihood of a random variable taking a 
 - All values of the pdf are independent
 - The pdf can be expressed as cumulative distribution function (cdf)
 
-## The normal distribution
-
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
-
-x <- seq(-8,8,length.out=10000)
-
-set.seed(667)
-
-d1 <- data.frame(x=x,
-                v1=dnorm(x,mean=0,sd=1),
-                v2=dnorm(x,mean=2,sd=3),
-                v3=dnorm(x,mean=-4,sd=0.5))
-d1 <- melt(d1, id.vars="x")
-d1$variable <- factor(as.character(d1$variable),labels=c("N(0,1)","N(2,3)","N(-4,0.5)"))
-
-set.seed(667)
-
-d2 <- data.frame(x=x,
-                v1=pnorm(x,mean=0,sd=1),
-                v2=pnorm(x,mean=2,sd=3),
-                v3=pnorm(x,mean=-4,sd=0.5))
-d2 <- melt(d2, id.vars="x")
-d2$variable <- factor(as.character(d2$variable), labels=c("N(0,1)","N(2,3)","N(-4,0.5)"))
-
-grid.arrange(
-  ggplot(d1, aes(x=x, y=value, col=variable)) +
-    geom_line() +
-    scale_color_brewer(palette="Set1") +
-    ylab("N(x)") +
-    ggtitle("pdf\n"),
-  
-  ggplot(d2, aes(x=x, y=value, col=variable)) +
-    geom_line() +
-    scale_color_brewer(palette="Set1") +
-    ylab("KumN(x)") +
-    ggtitle("cdf\n"),
-  
-  ncol=2
-)
-```
-
-$N(x) = P(X=x \vert \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi}}e^{\frac{-(x-\mu)^2}{2*\sigma^2}}$
-
-## Parameter estimation
-
-Many scientific conclusions are derived from the pdf of a population. For example, knowing the pdf of DBH values in our forests would allow us to calculate the verage yield we expect when harvesting the forest, or the amount of carbon stored in this particular forests. However, the parameters of a pdf are mostly unknown. We hence need to estimate those parameters from the sample.
-
-Assuming that the DBH is normally distributed in the population, we estimate: $\hat{\mu} = \overline{x} = 55.5$ and a $\hat{\sigma^2} = s = 15.7$.
-
-The estimates will approach the 'true' population value with $n \to \infty$. This means that larger samples will yield more precise estimates than smaller samples. However, the estimate of larger samples does not need to be more accurate!
-
-## Parameter estimation
-
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
-
-dat <- data.frame(DBH = seq(0, 120, length.out = 1000), 
-                  pdf = dnorm(seq(0, 120, length.out = 1000), mean(dbh$DBH), sd = sd(dbh$DBH)), 
-                  cdf = pnorm(seq(0, 120, length.out = 1000), mean(dbh$DBH), sd = sd(dbh$DBH)))
-
-grid.arrange(
-ggplot(dat, aes(x = DBH, y = pdf)) +
-  geom_line(),
-ggplot(dat, aes(x = DBH, y = cdf)) +
-  geom_line(), ncol = 2)
-
-```
-
-## Standard error and confidence interval
-
-To acount for uncertainty in the estimate, it is wise to estimate a range of values instead of a single value. In particular, if we would repeat the sampling of DBH values, we could yield a slightly different $\hat{\mu}$ each time, depending on the variance of the sample and the sample size (i.e., precision of the estimate). To express the variation in $\hat{\mu}$ when repeating the sampling, we make use of the standard error:
-
-$SE = \frac{s}{\sqrt{n}}$
-
-## Standard error and confidence interval
-
-From the standard error, we can estimate the confidence interval. Typically, we choose a 95% or 99% confidence interval. If we would repeat the sampling, there would be a 95% or 99% chance of including the 'true' population parameter. However, the confidence interval does not tell us anything about the sample already drawn!
-
-$CI_{95\%} = \overline{x} \pm SE * Z$
-
-with:
-
-$Z = \Phi^{-1}(0.95) = 1.96$ and $\Phi \sim N(0, 1)$.
-
-## Standard error and confidence interval
-
-For our example, the 95% confidence interval is:
-
-$CI_{95\%} = \frac{15.7}{\sqrt{150}} * 1.96 = 2.5$
-
-Hence, when repeating the sampling we would expect a mean DBH of 55.5 $\pm$ 2.5 cm in 95% of the cases.
-
-## Standard error and confidence interval
-
-Assume that we took 100 more samples of varying sample sizes (10 to 1000 trees). Further assume that we were following able to measure all trees in our forest, coming to the conlusion that the 'true' parameters are: $\mu = 55$ and a $\sigma^2 = 15$.
-
-## Standard error and confidence interval
-
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
-
-mean <- c()
-ci <- c()
-
-for(i in as.integer(seq(10, 1000, length.out = 100))){
-  x <- rnorm(i, 55, 15)
-  mean <- c(mean, mean(x))
-  ci <- c(ci, (sd(x) / sqrt(i)) * 1.96)
-}
-
-ggplot(data.frame(n = as.integer(seq(2, 1000, length.out = 100)), DBH = mean, CI = ci),
-       aes(x = n, y = DBH)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = DBH - CI, ymax = DBH + CI)) +
-  geom_hline(yintercept = 55, linetype = "dashed", col = "red")
-
-```
-
-# Distributions
-
 ## The most important distributions
 
 - Normal distribution
@@ -313,6 +391,8 @@ ggplot(data.frame(n = as.integer(seq(2, 1000, length.out = 100)), DBH = mean, CI
 - Log-normal distribution
 - t-distribution
 - F-distribution
+
+Though there are many more used in our field...
 
 ## Normal distribution
 
@@ -353,7 +433,6 @@ grid.arrange(
   ncol=2
 )
 ```
-
 
 $N(x) = P(X=x \vert \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi}}e^{\frac{-(x-\mu)^2}{2*\sigma^2}}$
 
@@ -622,14 +701,42 @@ Even though the p-value has a clear definition ($P(D|H_{0})$), it is very often 
 
 - The p-value does NOT tell you anything about the probability of the hypothesis given your data ($P(H_{0}|D)$)
 - The p-value is not a measure of effect size, that is it does NOT tell you anything about the strength of a difference
-- There is NO mathematical proof behind threshold (such as $p<0.05$) indicating significe
+- There is NO mathematical proof behind thresholds indicating significe (such as $p<0.05$)
 - A smaller p-value is NO indication that a difference is more important than one with a larger p-value
 
 I you're interested in the abuse of p-values, please see: http://www.nature.com/news/statisticians-issue-warning-over-misuse-of-p-values-1.19503
 
+## Example of p-value mis-use
+
+We sampled Nitrate concentrations in two catchments:
+
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
+
+nitrate <- data.frame(A = rnorm(100000, 15, 5),
+                      B = rnorm(100000, 15.5, 5))
+nitrate_plot <- melt(nitrate)
+ggplot(nitrate_plot, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(x = "Catchment", y = expression(paste("Nitrate [mg L"^-1*"]")))
+```
+
+Both sampels are taken from intensive measurement sites, with n = 100,000 and a sampling error of 0.3 $mg L^{-1}$. Do you think the differnece in Nitrate concentration is substantial?
+
+## Example of p-value mis-use
+
+Calculating the p-value we get $p y 0.000001$, indicating a highly significant difference. The difference in means, however, is only 0.5 $mg L^{-1}$, which is close to the measurement error.
+
+## Type I and Type II errors
+
+...
+
+# Type M and Type S errors
+
+...
+
 ## F-Test
 
-Simlar to the t-test, there is the F-test, which aims at testing on differences in the variances between two samples. The null hypothesis $H_{0}$ is: The sample variances are equal $s^{2}_{1} = s^{2}_{2}$.
+The F-test aims at testing the difference in the variances between two samples. The null hypothesis $H_{0}$ is: The sample variances are equal $s^{2}_{1} = s^{2}_{2}$.
 
 The test statistic is the F-value, calculated as the ratio of the sample variances: 
 
@@ -691,7 +798,7 @@ This results indicates that there is a high probability of obtaining a variance 
 
 ## Assumptions
 
-Both tests, t-test and F-test, asumme that the samples are normally distributed. The t-test moreover assumes equal variances for both samples.
+Both tests, t-test and F-test, asume that the samples are normally distributed. The t-test moreover assumes equal variances for both samples.
 
 # Correlation
 
