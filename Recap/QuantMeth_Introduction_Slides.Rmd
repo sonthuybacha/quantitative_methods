@@ -178,7 +178,7 @@ Knowing this curve would allow us to make statements about the forest we took th
 
 ## The normal distribution
 
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=3, fig.width=5, fig.align='center'}
 
 x <- seq(-8,8,length.out=10000)
 
@@ -224,7 +224,11 @@ ggplot(dat, aes(x = DBH, y = pdf)) +
 
 ## Sample consistency
 
-A sample is considered consistent if with increasing sample size the estimate approaches the true value (i.e., the estimate gets more accurate). Assume that we drew many samples with increasing sample size from a known population. We could estimate the mean and compare it to the 'true' mean:
+A sample is considered consistent if with increasing sample size the estimate approaches the true value (i.e., the estimate gets more accurate). 
+
+Assume that we drew many samples with increasing sample size from a known population. We could estimate the mean and compare it to the 'true' mean.
+
+## Sample consistency
 
 ```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
 
@@ -246,7 +250,11 @@ ggplot(data = data.frame(n = seq(10, 10000, 10),
 
 ## Sample bias
 
-A sample is un-biased when the deviance between the estimated and the expecte value is zero. Assume that we drew 10,000 samples (each n=150) from a known population and estimate the mean for each sample. Following, we calculated the difference between the known 'true' value and the estimate. The result yields following distribution:
+A sample is un-biased when the deviance between the estimated and the expecte value is zero. 
+
+Assume that we drew 10,000 samples (each n=150) from a known population and estimate the mean for each sample. Following, we calculated the difference between the known 'true' value and the estimate. The result yields following distribution.
+
+## Sample bias
 
 ```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
 
@@ -270,7 +278,7 @@ ggplot(data = data.frame(x = x - mean(pop)),
 
 The sampling variance indicates how precisely a sample estimate describes the population. Assume again that we drew many more samples from the same population (all with n = 150) and estimate the mean from each of those samples. The distribution of the sample means would look like this:
 
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=3, fig.width=3, fig.align='center'}
 set.seed(667) # One step ahead of the devil!
 dbh_repeat <- replicate(1000000, rnorm(150, 55, 15))
 dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
@@ -281,17 +289,17 @@ ggplot(data.frame(x = dbh_repeat_mean), aes(x = x)) + geom_histogram()
 
 We now also take many more samples with n=15 and estimate the mean from each of those samples. The distribution of the sample means for n=15 would look like this:
 
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=8, fig.align='center'}
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=3, fig.width=6, fig.align='center'}
 set.seed(667) # One step ahead of the devil!
 
 dbh_repeat <- replicate(1000000, rnorm(150, 55, 15))
 dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
-p1 <- ggplot(data.frame(DBH = dbh_repeat_mean), aes(x = DBH)) + geom_histogram() + xlim(35, 75)
+p1 <- ggplot(data.frame(DBH = dbh_repeat_mean), aes(x = DBH)) + geom_histogram() + xlim(40, 70)
 
 dbh_repeat2 <- replicate(1000000, rnorm(15, 55, 15))
 dbh_repeat2_mean <- apply(dbh_repeat2, 2, mean)
 
-p2 <- ggplot(data.frame(DBH = dbh_repeat2_mean), aes(x = DBH)) + geom_histogram() + xlim(35, 75)
+p2 <- ggplot(data.frame(DBH = dbh_repeat2_mean), aes(x = DBH)) + geom_histogram() + xlim(40, 70)
 
 grid.arrange(p1, p2, ncol = 2)
 ```
@@ -360,7 +368,7 @@ ggplot(data.frame(sample = 1:100, DBH = dbh_repeat_mean, ci = (dbh_repeat_sd / s
 
 ## Confidence interval
 
-Beware that precision and accuracy are two different things. Your estimate might be very precise, but not accurate. Accuracy hereby is defined as the difference between an estimate and the 'true' value. If there is a systematic difference between the an estimate and the 'true' value, we call this a bias.
+Beware that precision and accuracy are two different things. Accuracy hereby is defined as the difference between an estimate and the 'true' value. Your estimate might be very precise, but not accurate. In turn, your estimate might be very accurate, but very unprecise.
 
 ## Confidence interval
 
@@ -538,9 +546,7 @@ grid.arrange(
 )
 ```
 
-\begin{equation}
-  Pois(k) = P(X=k \mid \lambda) = \frac{\lambda^{k}e^{-\lambda}}{k!} 
-\end{equation}
+$Pois(k) = P(X=k \mid \lambda) = \frac{\lambda^{k}e^{-\lambda}}{k!}$
 
 ## Parameter of the poisson distribution
 
@@ -710,7 +716,7 @@ I you're interested in the abuse of p-values, please see: http://www.nature.com/
 
 We sampled Nitrate concentrations in two catchments:
 
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=10, fig.align='center'}
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=3, fig.width=3, fig.align='center'}
 
 nitrate <- data.frame(A = rnorm(100000, 15, 5),
                       B = rnorm(100000, 15.5, 5))
@@ -724,15 +730,7 @@ Both sampels are taken from intensive measurement sites, with n = 100,000 and a 
 
 ## Example of p-value mis-use
 
-Calculating the p-value we get $p y 0.000001$, indicating a highly significant difference. The difference in means, however, is only 0.5 $mg L^{-1}$, which is close to the measurement error.
-
-## Type I and Type II errors
-
-...
-
-# Type M and Type S errors
-
-...
+Calculating the p-value we get $p < 0.000001$, indicating a highly significant difference. The difference in means, however, is only 0.5 $mg L^{-1}$, which is close to the measurement error.
 
 ## F-Test
 
