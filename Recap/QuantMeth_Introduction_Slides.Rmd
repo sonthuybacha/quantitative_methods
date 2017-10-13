@@ -6,6 +6,8 @@ output:
   ioslides_presentation:
     widescreen: yes
 runtime: html
+width: 1440
+height: 900
 ---
 
 ```{r setup, include=FALSE}
