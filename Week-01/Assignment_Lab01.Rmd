@@ -1,0 +1,64 @@
+---
+title: "Assignment 1"
+author: "Name"
+date: "Date"
+output: html_document
+---
+
+### 1. Create a vector from a series of numbers:
+
+2-2-2-2-2-2-2-2-2-2-2-8-8-8-8-1-2-3-4-5-6-7-8-9-10-6-5-4-3-2-1-56-56-56-56-8-8-8-8-8
+
+From the above number series construct a vector `x` using the functions c(), rep() und seq(). Note, the elements in the above number series are separated by minus signs for readability!
+
+```{r}
+
+```
+
+### 2. How many elements has vector x?
+
+```{r}
+
+```
+
+### 3. Extract the 12th element from vector x.
+
+```{r}
+
+```
+
+### 4. Extract the elements 20-27 from vector x.
+
+```{r}
+
+```
+
+### 5. Extract the 12th and 20-27th element from vector x.
+
+```{r}
+
+```
+
+### 6. Convert vector x into a matrix m with 5 rows und 8 columns.
+
+```{r}
+
+```
+
+### 7. Extract the third column from matrix m.
+
+```{r}
+
+```
+
+### 8. From matrix m, extract the element from the fourth row and second column,
+
+```{r}
+
+```
+
+### 9. From matrix m, extract the 7ths and 8ths column.
+
+```{r}
+
+```
