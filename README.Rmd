@@ -1,8 +1,3 @@
----
-title: "Quantitative Methods"
-author: "Cornelius Senf"
-date: "17 Oktober 2017"
-output: html_document
----
+# Quantative Methods for Geographers
 
 This repository contains some lecture slides and assignments for the course 'Quantatice Methods' in the Master if Science program 'Global Change Geography' at Humboldt-University of Berlin. For further information please see: https://www.geographie.hu-berlin.de/en/studies/study-programs/master-degree-programs/master-of-science
