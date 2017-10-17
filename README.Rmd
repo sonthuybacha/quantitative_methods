@@ -1,3 +1,3 @@
 # Quantative Methods for Geographers
 
-This repository contains some lecture slides and assignments for the course 'Quantatice Methods' in the Master if Science program 'Global Change Geography' at Humboldt-University of Berlin. For further information please see: https://www.geographie.hu-berlin.de/en/studies/study-programs/master-degree-programs/master-of-science
+This repository contains some lecture slides and assignments for the course *Quantative Methods* in the Master of Science program *Global Change Geography* at Humboldt-University of Berlin. For further information please see: https://www.geographie.hu-berlin.de/en/studies/study-programs/master-degree-programs/master-of-science
