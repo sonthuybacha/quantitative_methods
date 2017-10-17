@@ -68,3 +68,10 @@ m[4, 2]
 ```{r}
 m[, 7:8]
 ```
+
+### 10. Convert matrix m into a data.frame names 'mm' and extract the 3rd column
+
+```{r}
+mm <- as.data.frame(m)
+mm[, 3]
+```

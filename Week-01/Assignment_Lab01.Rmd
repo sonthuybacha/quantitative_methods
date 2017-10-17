@@ -15,11 +15,15 @@ From the above number series construct a vector `x` using the functions c(), rep
 
 ```
 
+1 Point
+
 ### 2. How many elements has vector x?
 
 ```{r}
 
 ```
+
+1 Point
 
 ### 3. Extract the 12th element from vector x.
 
@@ -27,11 +31,15 @@ From the above number series construct a vector `x` using the functions c(), rep
 
 ```
 
+1 Point
+
 ### 4. Extract the elements 20-27 from vector x.
 
 ```{r}
 
 ```
+
+1 Point
 
 ### 5. Extract the 12th and 20-27th element from vector x.
 
@@ -39,11 +47,15 @@ From the above number series construct a vector `x` using the functions c(), rep
 
 ```
 
+1 Point
+
 ### 6. Convert vector x into a matrix m with 5 rows und 8 columns.
 
 ```{r}
 
 ```
+
+1 Point
 
 ### 7. Extract the third column from matrix m.
 
@@ -51,14 +63,28 @@ From the above number series construct a vector `x` using the functions c(), rep
 
 ```
 
+1 Point
+
 ### 8. From matrix m, extract the element from the fourth row and second column,
 
 ```{r}
 
 ```
 
+1 Point
+
 ### 9. From matrix m, extract the 7ths and 8ths column.
 
 ```{r}
 
 ```
+
+1 Point
+
+### 10. Convert matrix m into a data.frame names 'mm' and extract the 3rd column
+
+```{r}
+
+```
+
+1 Point
