@@ -1,0 +1,425 @@
+---
+title: "Introduction to R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 01
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+## Goals of today' session:
+
+- Matrices and data frames
+- Data import and export
+- Simple data manipulation
+
+# Matrices and data frames
+
+## R classes
+
+Recall the most important object classes in R:
+
+- vector
+- factor
+- matrix
+- data frame
+- list
+
+We already introduced you to vectors and factors. Today we will cover **matrix**, **data.frame** and **list** objects.
+
+## Matrices
+
+A matrix is a two-dimensional **Array**. A matrix therefore has additional **attributes** specifiying the 2 dimensions: **nrow** und **ncol**.
+
+```{r}
+m <- matrix(1:9, nrow = 3, ncol = 3)
+m
+```
+
+See: `dim(m)`, `nrow(m)`, `ncol(m)`
+
+## Matrices
+
+By default the columns of the matrix will be filled first.  If you want to fill the matrix by row, you can specify this with the `byrow` argument:
+
+```{r}
+n <- matrix(1:9, nrow = 3, ncol = 3, byrow = TRUE)
+n
+```
+
+## Matrices
+
+You can apply mathematical operators to matrices the same way as vectors (Attention: Recycling rule!): 
+
+```{r}
+m * 2
+m * n
+```
+
+## Matrices
+
+Like with vectors, you can access elements of a matrix with indices, except that we now deal with two dimensions `[i,j]` or `[row, column]`:
+
+```{r}
+m
+m[1, ]
+m[ , 1]
+```
+
+## Matrices
+
+```{r}
+m[1, 1]
+m[1:2, 3]
+m[1:2, c(1,3)]
+```
+
+## Matrices
+
+When you exctract elements from a matrix, the result can belong to a different class!
+
+```{r}
+class(m)
+class(m[ , 3])
+```
+
+## Matrices
+
+The functions `cbind()` und `rbind()` glue (bind) vectors and matrices together:
+
+```{r}
+# bind together by column
+cbind(m,n)
+```
+
+## Matrices
+
+The function `cbind` und `rbind` glue (bind) vectors and matrices together:
+
+```{r}
+# bind together by row
+rbind(m,n)
+```
+
+## Lists
+
+Lists are objectes that can store values of different data type (and different objects):
+
+```{r}
+l <- list(c(1, 2, 3), m, "a")
+```
+
+To access the elements of a list with indices you need to use double brackets `[[]]`:
+
+```{r}
+l[[1]]
+l[[3]]
+```
+
+## Why bother with lists now?
+
+Nearly all functions (e.g., linear regression, generalised linear modelling, t-test, etc.) in R produce output that is stored in a list. The good news is that R contains various functions to extract required information (e.g., estimated values, p-values, etc.) and presents it in nice tables. However, sometimes it can be useful to extract information from the results directly OR you may want to use a list to return the output from your own functions.
+
+## Lists
+
+```{r}
+class(l)
+class(l[2])
+class(l[[2]])
+```
+
+## Data frames
+
+A data frame is what you may call a data table. It is similar to a two-dimensional matrix but the columns can contain different data types.
+
+```{r}
+df <- data.frame(TREEID = 1001:1003, 
+                 SPECIES = factor(c("Spruce", "Fir", "Pine")), 
+                 LIFE = c(TRUE, FALSE, TRUE),
+                 HEIGHT = c(34, 21, 26)
+                 )
+df
+```
+
+## Data frames
+
+The `summary()` function gives a quick overview. Helpful for spotting data entry errors and `NA`'s:
+
+```{r}
+summary(df)
+```
+
+## Data frames
+
+You can index (access) columns using three main ways:
+
+```{r}
+df$TREEID
+df[ , 1]
+df[ , "TREEID"]
+```
+
+## Data frames
+
+Rows are indexed by row number:
+
+```{r}
+df[3, ]
+df[1:2, "TREEID"]
+df[1, c("TREEID", "HEIGHT")]
+```
+
+## Data frames
+
+IMPORTANT: Extracting a row does not change the class but, extracting a column does!
+
+```{r}
+class(df)
+class(df[ 1, ])
+class(df[ , "TREEID"])
+```
+
+# Data import and export
+
+## Data import
+
+R can read a variety of dataset formats:
+
+- Text files (e.g. CSV, TXT)
+- Statistical programs (e.g. Excel, SPSS table)
+- DBF file (e.g. ArcGIS)
+- Databases (e.g. PostgreSQL)
+- local file system or on a remote server (e.g. ftp, http)
+- https://cran.r-project.org/doc/manuals/r-release/R-data.html
+
+## Data import: Text files
+
+Text (ASCII) files are a popular data storage and exchange format. They can be read on any OS platform and without specialty software (Notepad).
+
+Comma-separated (csv) or tab-separated files are common formats to store table data (in systems with English locale). 
+
+BE AWARE: On German (and other) systems, the comma is already reserved for decimal places, so here the semi-colon or tab-separation is sometimes prefered. On English systems, the dot (`.`) is used for decimal places, on other systems it may be used to group digits for readability, e.g. `1,000,000`.
+
+## Data import: Text files
+
+The `read.table()` function can be used to read table data from text files. The function allows several arguments to accomodate the different data formats. See `?read.table()`
+
+The following example specifies the following format options:
+
+- The columns are separated by `,`
+- The decimal sign is `.`
+- and the first row contains the column names `header = TRUE`
+
+```{r}
+tab <- read.table("Data/airquality.txt", sep = ",", dec = ".", header = TRUE)
+```
+
+## Data import: Text files
+
+`read.table()` returns a data frame.
+
+```{r}
+class(tab)
+names(tab)
+head(tab, 3)
+```
+
+## Data import: Text files
+
+`read.csv()` is a short-cut of `read.table()` text files with comma-separated columns.
+
+## Data export: Text files
+Export data frames to semi-colon delimited file:
+
+```{r}
+write.table(tab, "Data/airquality_output.txt", sep = ";", dec = ".", row.names = FALSE)
+```
+
+You can also use `write.csv()` to export data frames to comma-delimited text files:
+
+```{r}
+write.csv(tab, "Data/airquality_output.csv")
+```
+
+    write.table(x, file = "", append = FALSE, quote = TRUE, sep = " ",
+    eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+    col.names = TRUE, qmethod = c("escape", "double"),
+    fileEncoding = "")
+            
+# Simple data manipulation
+
+## Missing values
+
+Recall from last session that `NA` is used for missing values in R: 
+
+```{r}
+x <- c(1, 5, 3, 6, NA, 9, 21, 4)
+x
+```
+
+..and that you must use `is.na()` to determine if an element is or contains missing values.
+
+```{r}
+is.na(x)
+```
+
+## Missing values
+
+It is not uncommon to have missing values in datasets, e.g. in data frames and matrices:
+
+```{r}
+df <- data.frame(var1 = c(1, 3, 12, NA, 5), 
+                 var2 = c(3, 4, 1, 8, 11))
+df
+```
+
+## Missing values
+
+Use `na.omit()` to ignore rows in a data frame that contain `NA`s:
+
+```{r}
+na.omit(df)
+```
+
+## Missing values
+
+Also recall that arithmetic functions and operations applied to `NA`s return `NA`
+
+```{r}
+NA * 3
+```
+
+Many arithmetic functions allow you to specify whether to ignore or include `NA`s:
+
+```{r}
+sum(df$var1)
+sum(df$var1, na.rm=TRUE)
+```
+
+## Text manipulation
+
+Combine two or more character variables witht `paste()`:
+
+```{r}
+paste("Hello", "World", sep = "_")
+```
+
+Extract a portion of a character variable `substring()`:
+
+```{r}
+substring("Hello World", first = 3, last = 8)
+```
+
+## Subset columns of a data frame
+
+It is best to extract columns from a data frame using the column names:
+
+```{r}
+names(airquality)
+
+airquality_ozone <- airquality$Ozone
+airquality_ozone <- airquality[, "Ozone"]
+airquality_ozone_temp <- airquality[, c("Ozone", "Temp")]
+```
+
+## Subset rows of a data frame
+
+Subset rows based using logical operations on variables (columns):
+
+```{r}
+airquality_temp_gr_70 <- airquality[airquality$Temp > 70, ]
+nrow(airquality_temp_gr_70)
+```
+
+Subset rows based on row indices:
+```{r}
+airquality_zeile_10_100 <- airquality[1:100, ]
+nrow(airquality_zeile_10_100)
+```
+
+## Subset rows of a data frame
+
+You can combine logical operators to make more complex subsets of rows and columns:
+
+```{r}
+airquality_juni <- airquality[airquality$Month == 6, ]
+```
+
+all measurements from 15. Juni:
+
+```{r}
+airquality_juni_15 <- airquality[airquality$Month == 6 & airquality$Day == 15, ]
+```
+
+or return only Ozone values (column) from 15. Juni:
+
+```{r}
+ozone_juni_15 <- airquality[airquality$Month == 6 & airquality$Day == 15, "Ozone"]
+```
+
+## Subset rows of a data frame
+
+In previously covered logical operations, single values were compared to vectors or matices (or single values), e.g. `c(1,2,3) < 2`.
+
+The `%in%` operator can be applied to two vectors: `x %in% y`. For each element in vector `x`, `%in%` evaluates if the element is contained in vector `y`. The operator returns a logical vector of the same lenght as vector `x`.
+
+The following example returns all rows of month June and July.
+```{r}
+airquality_jun_jul <- airquality[airquality$Month %in% c(6, 7), ]
+```
+
+## Create a new variable from existing variables
+
+Recall, the `$` operator is used to access columns in a data frame by name. You can also use it to create a new column:
+
+The following example creates a new column with the name "NewVariable" and fills it with Ozone values multiplied by 100.
+
+```{r}
+airquality$NewVariable <- airquality$Ozone * 100
+```
+
+Or we create a log transformated variable.
+
+```{r}
+airquality$logOzone <- log(airquality$Ozone)
+```
+
+## Create a factor variable from numeric variables
+
+The following example creates a factor (categorical) variable from temperature data:
+
+First, add an empty character vector:
+
+```{r}
+airquality$TempClass <- rep("", nrow(airquality))
+```
+
+Then, recode the character vector based on logical operations on `$Temp`:
+
+```{r}
+airquality[airquality$Temp >= 70 , "TempClass"] <- "warm"
+airquality[airquality$Temp < 70 , "TempClass"] <- "cold"
+airquality$TempClass <- factor(airquality$TempClass)
+```
+
+## Create a factor variable from numeric variables
+
+The functino `cut` divides a numeric variable into intervals and codes them into factors (categorical data):
+
+```{r}
+airquality$TempClass2 <- cut(airquality$Temp, c(0, 69, 100), labels=c('cold', 'warm'))
+```
+
+Note, there are even more ways to do the same task!!

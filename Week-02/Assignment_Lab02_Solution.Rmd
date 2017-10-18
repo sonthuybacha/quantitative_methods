@@ -1,0 +1,157 @@
+---
+title: "Assignment Lab Session 2"
+author: "Cornelius Senf"
+date: "18.10.2017"
+output: html_document
+---
+
+### 1. Vectors (1 Point)
+
+Create a vector from a series of numbers:
+
+2-2-2-2-2-2-2-2-2-2-2-8-8-8-8-1-2-3-4-5-6-7-8-9-10-6-5-4-3-2-1-56-56-56-56-8-8-8-8-8
+
+From the above number series construct a vector `x` using the functions c(), rep() und seq(). Note, the elements in the above number series are separated by minus signs for readability!
+
+```{r}
+x <- c(rep(2, 11),
+         rep(8, 4),
+         1:10,
+         seq(from = 6, to = 1, by = -1),
+         rep(56, 4),
+         rep(8, 5))
+```
+
+How many elements has vector x?
+
+```{r}
+length(x)
+```
+
+Extract the 12th element from vector x.
+
+```{r}
+x[12]
+```
+
+Extract the elements 20-27 from vector x.
+
+```{r}
+x[20:27]
+```
+
+Extract the 12th and 20-27th element from vector x.
+
+```{r}
+x[c(12, 20:27)]
+```
+
+### 2. Matrices (1 Point)
+
+Convert vector x into a matrix m with 5 rows und 8 columns.
+
+```{r}
+m <- matrix(x, nrow = 5)
+m
+```
+
+Extract the third column from matrix m.
+
+```{r}
+m[, 3]
+```
+
+From matrix m, extract the element from the fourth row and second column,
+
+```{r}
+m[4, 2]
+```
+
+From matrix m, extract the 7ths and 8ths column.
+
+```{r}
+m[, 7:8]
+```
+
+### 3. Data frames (2 Points)
+
+Download the airquality data set from Moodle and import it into R.
+
+```{r}
+dat <- read.csv("Data/airquality.txt")
+```
+
+Answer the following questions:
+
+- What is the concentration of ozone on May 20th?
+- What is the mean temperature on July 16th?
+- How many days had an ozone concentration greater than 50 ppm?
+
+```{r}
+# What is the concentration of ozone on May 20th?
+dat[dat$Month == 5 & dat$Day == 20, "Ozone"]
+
+# What is the mean temperature in July?
+temp_july <- dat[dat$Month == 7, "Temp"]
+mean(temp_july)
+
+# What is the minimum and maximum concentration of ozone on in August?
+ozone_august <- dat[dat$Month == 8, "Ozone"]
+min(ozone_august, na.rm = TRUE)
+max(ozone_august, na.rm = TRUE)
+```
+
+### Manipulate data (3 Points)
+
+Convert column `Month` (numeric) to a factor using the months names as factor labels ("May", "June", ...).
+
+```{r}
+dat$Month <- factor(dat$Month)
+levels(dat$Month) <- c("May", "June", "July", "August", "September")
+```
+
+Use the function `paste()` to create a new column called 'Date' of the following format: 'Month-Day', 'May-1', 'May-2', 'May-3', ...
+
+```{r}
+Date <- paste(dat$Month, dat$Day, sep = "-")
+dat <- cbind(dat, Date)
+```
+
+Create two new variables ('Temp.C' and 'Wind.ms') that show temperature in Celsius and wind speed in m/s (instead of Fahrenheit und mph). Show the first five records for each new variable.
+
+```{r}
+# Temperature
+dat$Temp.C <- (dat$Temp - 32) / 1.8
+head(dat$Temp.C)
+
+# Windpseed
+dat$Wind.ms <- dat$Wind * 0.44704
+head(dat$Wind.ms)
+```
+
+Write the data to a file called 'airquality2.csv' using scv format.
+
+```{r}
+write.csv(dat, file = "Data/airquality2.csv", row.names = FALSE)
+```
+
+### Loading new data (3 points)
+
+Download the dataset 'treering.csv' from Moodle. Inspect it in either Excel or a text editor (Notepad++ for Windows or TextWrangler for Mac). Try loading the dataset into a data frame.
+
+```{r}
+treering <- read.table("Data/treering.csv", sep = ";", dec = ",", header = TRUE)
+```
+
+Drop all rows containing at least one `NA` value.
+
+```{r}
+treering_nomissing <- na.omit(treering)
+```
+
+What is the mean increment (tree-ring width) for plot X40B?
+
+```{r}
+mean(treering_nomissing$X40B)
+```
+

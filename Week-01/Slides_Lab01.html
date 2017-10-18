@@ -113,8 +113,8 @@ slide.backdrop {
 <li>How to get and run R</li>
 <li>R Syntax</li>
 <li>Arithmetic calculations and mathematical functions</li>
-<li>Data types and classes</li>
-<li>Data manipulation - Part 1</li>
+<li>Data types</li>
+<li>Vectors and factors</li>
 </ul>
 
 </article></slide><slide class=''><hgroup><h2>Recommended reading</h2></hgroup><article  id="recommended-reading" class="smaller ">
@@ -423,9 +423,9 @@ c</pre>
 
 <pre class = 'prettyprint lang-r'>?help</pre>
 
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>R classes</h2></hgroup><article  id="r-classes" class="smaller ">
+</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>Vectors and factors</h2></hgroup><article  id="vectors-and-factors" class="smaller ">
 
-</article></slide><slide class=''><hgroup><h2>R classes</h2></hgroup><article  id="r-classes-1" class="smaller ">
+</article></slide><slide class=''><hgroup><h2>R classes</h2></hgroup><article  id="r-classes" class="smaller ">
 
 <p>Multiple values can be stored in data structures, so called classes. There are five classes in R:</p>
 
@@ -437,7 +437,7 @@ c</pre>
 <li>list</li>
 </ul>
 
-<p>You can determine the class of an objective with the function <code>class()</code>.</p>
+<p>You can determine the class of an objective with the function <code>class()</code>. Today we are going to cover <strong>vectors</strong> and <strong>factors</strong>.</p>
 
 </article></slide><slide class=''><hgroup><h2>Vectors</h2></hgroup><article  id="vectors" class="smaller ">
 
@@ -667,11 +667,11 @@ treespecies</pre>
 
 <p>You can change the names of the levels (categories) as follows:</p>
 
-<pre class = 'prettyprint lang-r'>levels(treespecies) &lt;- c(&quot;Spruce&quot;, &quot;Pine&quot;, &quot;Fir&quot;)
+<pre class = 'prettyprint lang-r'>levels(treespecies) &lt;- c(&quot;Fir&quot;, &quot;Pine&quot;, &quot;Spruce&quot;)
 treespecies</pre>
 
-<pre >## [1] Fir    Pine   Spruce Spruce Pine  
-## Levels: Spruce Pine Fir</pre>
+<pre >## [1] Spruce Pine   Fir    Fir    Pine  
+## Levels: Fir Pine Spruce</pre>
 
 </article></slide><slide class=''><hgroup><h2>Factors</h2></hgroup><article  id="factors-2" class="smaller ">
 
@@ -684,240 +684,8 @@ treespecies</pre>
 
 <pre class = 'prettyprint lang-r'>treespecies</pre>
 
-<pre >## [1] &lt;NA&gt;   Pine   Spruce Spruce Pine  
-## Levels: Spruce Pine Fir</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller ">
-
-<p>A matrix is a two-dimensional <strong>Array</strong>. A matrix therefore has additional <strong>attributes</strong> specifiying the 2 dimensions: <strong>nrow</strong> und <strong>ncol</strong>.</p>
-
-<pre class = 'prettyprint lang-r'>m &lt;- matrix(1:9, nrow = 3, ncol = 3)
-m</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    4    7
-## [2,]    2    5    8
-## [3,]    3    6    9</pre>
-
-<p>See: <code>dim(m)</code>, <code>nrow(m)</code>, <code>ncol(m)</code></p>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-1" class="smaller ">
-
-<p>By default the columns of the matrix will be filled first. If you want to fill the matrix by row, you can specify this with the <code>byrow</code> argument:</p>
-
-<pre class = 'prettyprint lang-r'>n &lt;- matrix(1:9, nrow = 3, ncol = 3, byrow = TRUE)
-n</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    2    3
-## [2,]    4    5    6
-## [3,]    7    8    9</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-2" class="smaller ">
-
-<p>You can apply mathematical operators to matrices the same way as vectors (Attention: Recycling rule!):</p>
-
-<pre class = 'prettyprint lang-r'>m * 2</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    2    8   14
-## [2,]    4   10   16
-## [3,]    6   12   18</pre>
-
-<pre class = 'prettyprint lang-r'>m * n</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    8   21
-## [2,]    8   25   48
-## [3,]   21   48   81</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-3" class="smaller ">
-
-<p>Like with vectors, you can access elements of a matrix with indices, except that we now deal with two dimensions <code>[i,j]</code> or <code>[row, column]</code>:</p>
-
-<pre class = 'prettyprint lang-r'>m</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    4    7
-## [2,]    2    5    8
-## [3,]    3    6    9</pre>
-
-<pre class = 'prettyprint lang-r'>m[1, ]</pre>
-
-<pre >## [1] 1 4 7</pre>
-
-<pre class = 'prettyprint lang-r'>m[ , 1]</pre>
-
-<pre >## [1] 1 2 3</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-4" class="smaller ">
-
-<pre class = 'prettyprint lang-r'>m[1, 1]</pre>
-
-<pre >## [1] 1</pre>
-
-<pre class = 'prettyprint lang-r'>m[1:2, 3]</pre>
-
-<pre >## [1] 7 8</pre>
-
-<pre class = 'prettyprint lang-r'>m[1:2, c(1,3)]</pre>
-
-<pre >##      [,1] [,2]
-## [1,]    1    7
-## [2,]    2    8</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-5" class="smaller ">
-
-<p>When you exctract elements from a matrix, the result can belong to a different class!</p>
-
-<pre class = 'prettyprint lang-r'>class(m)</pre>
-
-<pre >## [1] &quot;matrix&quot;</pre>
-
-<pre class = 'prettyprint lang-r'>class(m[ , 3])</pre>
-
-<pre >## [1] &quot;integer&quot;</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-6" class="smaller ">
-
-<p>The functions <code>cbind()</code> und <code>rbind()</code> glue (bind) vectors and matrices together:</p>
-
-<pre class = 'prettyprint lang-r'># bind together by column
-cbind(m,n)</pre>
-
-<pre >##      [,1] [,2] [,3] [,4] [,5] [,6]
-## [1,]    1    4    7    1    2    3
-## [2,]    2    5    8    4    5    6
-## [3,]    3    6    9    7    8    9</pre>
-
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-7" class="smaller ">
-
-<p>The function <code>cbind</code> und <code>rbind</code> glue (bind) vectors and matrices together:</p>
-
-<pre class = 'prettyprint lang-r'># bind together by row
-rbind(m,n)</pre>
-
-<pre >##      [,1] [,2] [,3]
-## [1,]    1    4    7
-## [2,]    2    5    8
-## [3,]    3    6    9
-## [4,]    1    2    3
-## [5,]    4    5    6
-## [6,]    7    8    9</pre>
-
-</article></slide><slide class=''><hgroup><h2>Lists</h2></hgroup><article  id="lists" class="smaller ">
-
-<p>Lists are objectes that can store values of different data type (and different objects):</p>
-
-<pre class = 'prettyprint lang-r'>l &lt;- list(c(1, 2, 3), m, &quot;a&quot;)</pre>
-
-<p>To access the elements of a list with indices you need to use double brackets <code>[[]]</code>:</p>
-
-<pre class = 'prettyprint lang-r'>l[[1]]</pre>
-
-<pre >## [1] 1 2 3</pre>
-
-<pre class = 'prettyprint lang-r'>l[[3]]</pre>
-
-<pre >## [1] &quot;a&quot;</pre>
-
-</article></slide><slide class=''><hgroup><h2>Why bother with lists now?</h2></hgroup><article  id="why-bother-with-lists-now" class="smaller ">
-
-<p>Nearly all functions (e.g., linear regression, generalised linear modelling, t-test, etc.) in R produce output that is stored in a list. The good news is that R contains various functions to extract required information (e.g., estimated values, p-values, etc.) and presents it in nice tables. However, sometimes it can be useful to extract information from the results directly OR you may want to use a list to return the output from your own functions.</p>
-
-</article></slide><slide class=''><hgroup><h2>Lists</h2></hgroup><article  id="lists-1" class="smaller ">
-
-<pre class = 'prettyprint lang-r'>class(l)</pre>
-
-<pre >## [1] &quot;list&quot;</pre>
-
-<pre class = 'prettyprint lang-r'>class(l[2])</pre>
-
-<pre >## [1] &quot;list&quot;</pre>
-
-<pre class = 'prettyprint lang-r'>class(l[[2]])</pre>
-
-<pre >## [1] &quot;matrix&quot;</pre>
-
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames" class="smaller ">
-
-<p>A data frame is what you may call a data table. It is similar to a two-dimensional matrix but the columns can contain different data types.</p>
-
-<pre class = 'prettyprint lang-r'>df &lt;- data.frame(TREEID = 1001:1003, 
-                 SPECIES = factor(c(&quot;Spruce&quot;, &quot;Fir&quot;, &quot;Pine&quot;)), 
-                 LIFE = c(TRUE, FALSE, TRUE),
-                 HEIGHT = c(34, 21, 26)
-                 )
-df</pre>
-
-<pre >##   TREEID SPECIES  LIFE HEIGHT
-## 1   1001  Spruce  TRUE     34
-## 2   1002     Fir FALSE     21
-## 3   1003    Pine  TRUE     26</pre>
-
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-1" class="smaller ">
-
-<p>The <code>summary()</code> function gives a quick overview. Helpful for spotting data entry errors and <code>NA</code>&#39;s:</p>
-
-<pre class = 'prettyprint lang-r'>summary(df)</pre>
-
-<pre >##      TREEID       SPECIES     LIFE             HEIGHT    
-##  Min.   :1001   Fir   :1   Mode :logical   Min.   :21.0  
-##  1st Qu.:1002   Pine  :1   FALSE:1         1st Qu.:23.5  
-##  Median :1002   Spruce:1   TRUE :2         Median :26.0  
-##  Mean   :1002                              Mean   :27.0  
-##  3rd Qu.:1002                              3rd Qu.:30.0  
-##  Max.   :1003                              Max.   :34.0</pre>
-
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-2" class="smaller ">
-
-<p>You can index (access) columns using three main ways:</p>
-
-<pre class = 'prettyprint lang-r'>df$TREEID</pre>
-
-<pre >## [1] 1001 1002 1003</pre>
-
-<pre class = 'prettyprint lang-r'>df[ , 1]</pre>
-
-<pre >## [1] 1001 1002 1003</pre>
-
-<pre class = 'prettyprint lang-r'>df[ , &quot;TREEID&quot;]</pre>
-
-<pre >## [1] 1001 1002 1003</pre>
-
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-3" class="smaller ">
-
-<p>Rows are indexed by row number:</p>
-
-<pre class = 'prettyprint lang-r'>df[3, ]</pre>
-
-<pre >##   TREEID SPECIES LIFE HEIGHT
-## 3   1003    Pine TRUE     26</pre>
-
-<pre class = 'prettyprint lang-r'>df[1:2, &quot;TREEID&quot;]</pre>
-
-<pre >## [1] 1001 1002</pre>
-
-<pre class = 'prettyprint lang-r'>df[1, c(&quot;TREEID&quot;, &quot;HEIGHT&quot;)]</pre>
-
-<pre >##   TREEID HEIGHT
-## 1   1001     34</pre>
-
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-4" class="smaller ">
-
-<p>IMPORTANT: Extracting a row does not change the class but, extracting a column does!</p>
-
-<pre class = 'prettyprint lang-r'>class(df)</pre>
-
-<pre >## [1] &quot;data.frame&quot;</pre>
-
-<pre class = 'prettyprint lang-r'>class(df[ 1, ])</pre>
-
-<pre >## [1] &quot;data.frame&quot;</pre>
-
-<pre class = 'prettyprint lang-r'>class(df[ , &quot;TREEID&quot;])</pre>
-
-<pre >## [1] &quot;integer&quot;</pre></article></slide>
+<pre >## [1] &lt;NA&gt; Pine Fir  Fir  Pine
+## Levels: Fir Pine Spruce</pre></article></slide>
 
 
   <slide class="backdrop"></slide>
