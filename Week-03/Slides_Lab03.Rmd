@@ -1,0 +1,581 @@
+---
+title: "Introduction to R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 03
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+## Goals of today' session:
+
+- Load packages
+- Visualization
+- Tidy data
+- Data wrangling
+
+# Load packages
+
+## Load packages
+
+A package is a collection of previously programmed functions, often including functions for specific tasks. It is tempting to call this a library, but the R community refers to it as a package.
+
+There are two types of packages: those that come with the base installation of R and packages that you must manually download and install using `install.packages("package")`. You can load a package with `library(package)`.
+
+One very powerful graphics package is **ggplot2**.
+
+```{r eval=FALSE}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+You only need to install a package once, but you need to load it every time you start a new R-Session!
+
+## Namespace
+
+Sometimes functions from different packages have a common name (e.g., `select()` in the **raster** and **dplyr** packages). We therefore need to tell R which function it should use by defining the namespace for the function:
+
+```{r eval=FALSE}
+raster::select()
+dplyr::select()
+```
+
+# Visualization
+
+## R base graphics
+
+R's `base` graphics are great for quick visualization of your data. The main base graphics functions are `plot()`, `hist()` und `boxplot()`: 
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+hist(airquality[ , c("Ozone")])
+```
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+plot(airquality[ , c("Ozone")], airquality[ , c("Temp")])
+```
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+boxplot(airquality[ , c("Ozone")] ~ airquality[ , c("Month")])
+```
+
+## R base graphics: Histogram
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+hist(airquality[ , c("Ozone")])
+```
+
+## R base graphics: Scatterplot
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+plot(airquality[ , c("Ozone")], airquality[ , c("Temp")])
+```
+
+## R base graphics: Boxplot
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+boxplot(airquality[ , c("Ozone")] ~ airquality[ , c("Month")])
+```
+
+## ggplot2
+
+The base graphics system can also be used visualize complex datasets and relationships, but you will need to write your own functions. The external **ggplot2** package is a great alternative:
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+library(ggplot2)
+
+ggplot(data = airquality, aes(x = Ozone)) +
+  geom_histogram()
+```
+
+## ggplot2: Histogram
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+
+ggplot(data = airquality, aes(x = Ozone)) +
+  geom_histogram()
+```
+
+## ggplot2: Geom and aesthetics
+
+The ggplot2 package works somewhat differently than the base graphics. When you call a ggplot you have to define **aesthetics** and one or multiple **geom** layers, e.g. `geom_histogram` in the previous example or `geom_point` in the following example.
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) + 
+  geom_point()
+```
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
+  geom_boxplot()
+```
+
+## ggplot2: Scatterplot
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) + 
+  geom_point()
+```
+
+## ggplot2: Boxplot
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = factor(Month), y = Ozone)) +
+  geom_boxplot()
+```
+
+## ggplot2: Grouping by factor
+
+You can use factor variables to change the **aesthetics** of `geom_point` and `geom_line` layers. The following example visualizes the data from different months with different colors.
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point()
+```
+
+## ggplot2: Grouping by factor
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point()
+```
+
+## ggplot2: Grouping by factor
+
+You can also display factors through different symbols (with `geom_point`):
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, shape  = factor(Month))) +
+  geom_point()
+```
+
+## ggplot2: Grouping by factor
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, shape  = factor(Month))) +
+  geom_point()
+```
+
+## ggplot2: Grouping by factor
+
+...or the line type with `geom_line`:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Day, y = Temp, linetype = factor(Month))) +
+  geom_line()
+```
+
+## ggplot2: Grouping by factor
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Day, y = Temp, linetype = factor(Month))) +
+  geom_line()
+```
+
+## ggplot2: Grouping by factor
+
+..or the fill color of `geom_boxplot` and `geom_histogram`:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, fill = factor(Month))) +
+  geom_histogram()
+```
+
+## ggplot2: Grouping by factor
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, fill = factor(Month))) +
+  geom_histogram()
+```
+
+## ggplot2: Scaling by numeric variables
+
+Factors can be used to define colors and symbols. Numeric varibles can be displayed by varying symbol sizes and color gradients:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = Wind, size = Solar.R)) +
+  geom_point()
+```
+
+## ggplot2: Scaling by numeric variables
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = Wind, size = Solar.R)) +
+  geom_point()
+```
+
+## ggplot2: Trellis graphs
+
+Trellis plots are based on the idea of conditioning on the values taken on by one or more of the variables in a data set.
+
+In the case of a categorical variable, this means carrying out the same plot for the data subsets corresponding to each of the levels of that variable.
+
+R provides built-in trellis graphics with the `lattice` package. 
+
+In `ggplot2` trellis plots (here called multi-facet plots) can be achieved with `facet_wrap()`:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) +
+  geom_point() +
+  facet_wrap(~Month)
+```
+
+## ggplot2: Trellis graphs
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) +
+  geom_point() +
+  facet_wrap(~Month)
+```
+
+## ggplot2: Trellis graphs
+
+The axes among individual plots (pannels) can be either fixed or variable (free):
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) +
+  geom_point() +
+  facet_wrap(~Month, scales = "free")
+```
+
+additional arguments: `free`, `free_x` und `free_y`
+
+## ggplot2: Trellis graphs
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp)) +
+  geom_point() +
+  facet_wrap(~Month, scales = "free")
+```
+
+## ggplot2: Combining multiple layers
+
+A ggplot can contain multiple layers and each layer can have its own `aesthetics`:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Day, y = Temp)) +
+  geom_point(aes(size = Ozone)) +
+  geom_line(aes(linetype = factor(Month)))
+```
+
+## ggplot2: Combining multiple layers
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Day, y = Temp)) +
+  geom_point(aes(size = Ozone)) +
+  geom_line(aes(linetype = factor(Month)))
+```
+
+## ggplot2: Axis text and plot title
+
+Modify axes titles with `xlab()` and `ylab()`, and plot title with `ggtitle()`:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point() +
+  labs(x = "Ozone concentration [ppm]", 
+       y = "Temperature [°F]", 
+       title = "Relationship between Ozone und Temperture in New York")
+```
+
+## ggplot2: Axis text and plot title
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point() +
+  labs(x = "Ozone concentration [ppm]", 
+       y = "Temperature [°F]", 
+       title = "Relationship between Ozone und Temperture in New York")
+```
+
+## Multi-plot graphics
+
+You can combine multiple plots in a single graphic layout with `grid.arrange()` of the **gridExtra** package. First, you must create a graphics object for each plot. Then the two objects are combined with `grid.arrange()`.
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+plot1 <- ggplot(data = airquality, aes(x = Ozone, y = Temp)) + geom_point()
+plot2 <- ggplot(data = airquality, aes(x = Ozone, y = Wind)) + geom_point()
+
+library(gridExtra)
+
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+## Multi-plot graphics
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+plot1 <- ggplot(data = airquality, aes(x = Ozone, y = Temp)) + geom_point()
+plot2 <- ggplot(data = airquality, aes(x = Ozone, y = Wind)) + geom_point()
+
+library(gridExtra)
+
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+## Graphics file formats
+
+R graphics can be exported into a number of file formats:
+
+- pdf
+- tiff
+- png
+- jpg
+- ...
+
+## Graphics file formats
+
+To export graphics you need to 'open' a new **Graphic Device** before running your plot functions and close it when you are done.  The 'opening' function depends on the format (e.g. `pdf()`, `tif()`, `png()`, etc.). To close the graphics device you need to call `dev.off()`.
+
+```{r fig.keep='none', message=FALSE, warning=FALSE, results='hide'}
+pdf(file = "Figures/scatterplot01.pdf", width = 7, height = 5)
+
+ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point()
+
+dev.off()
+```
+
+## Graphics file formats
+
+Alternatively, you cann use the `ggsave()` function.
+
+```{r fig.keep='none', message=FALSE, warning=FALSE, results='hide'}
+p <- ggplot(data = airquality, aes(x = Ozone, y = Temp, col = factor(Month))) +
+  geom_point()
+
+ggsave(filename = "plot.pdf", plot = p, path = "Figures")
+```
+
+# Tidy data and data wrangling
+
+## Tidy data
+
+Cleaning and preparing (tidying) data for analysis can make up a substantial proportion of the time spent on a project. It is therefore good practice to follow certain guidelines for structuring your data (see: H. Wickam (2014) Tidy data. Journal of Statistical Software, 59, 1-23):
+
+1. Each variable forms a column.
+2. Each observation forms a row.
+3. Each type of observational unit forms a table.
+
+## Tidy data
+
+Real datasets can, and often do, violate the three precepts of tidy data in almost every way imaginable. While occasionally you do get a dataset that you can start analysing immediately, this is the exception, not the rule. This section describes the five most common problems with messy datasets, along with their remedies:
+
+- Column headers are values, not variable names.
+- Multiple variables are stored in one column.
+- Variables are stored in both rows and columns.
+- Multiple types of observational units are stored in the same table.
+- A single observational unit is stored in multiple tables.
+
+Most messy datasets, including types of messiness not explicitly described above, can be tidied with a small set of tools.
+
+## Tidy data
+
+Basically, data is often recoreded in this format (wide-format):
+
+|     Plot    | Measure1 | Measure2 |
+|-------------|----------|----------|
+| 1           |   13.1   |   12.7   |
+| 2           |   9.5    |   10.6   |
+| 3           |   11.9   |   7.4    |
+
+## Tidy data
+
+But we want to have it in following format (long-format)
+
+|     Plot    | Measure  |  Value   |
+|-------------|----------|----------|
+| 1           |   M1     |   13.1   |
+| 2           |   M1     |   9.5    |
+| 3           |   M1     |   11.9   |
+| 1           |   M2     |   12.7   |
+| 2           |   M2     |   10.6   |
+| 3           |   M2     |   7.4    |
+
+## Tidying messy datasets
+
+```{r}
+yields <- read.table("Data/yields.txt", sep = ";", header = TRUE)
+
+yields[1:5, ]
+```
+
+## Tidying messy datasets
+
+The `gather()` function in the **tidyr** package can be used to convert the previous dataset into a *tidy* dataset:
+
+```{r}
+library(tidyr)
+
+yields_tidy <- gather(yields, key = soiltype, value = yield, -plotid)
+
+yields_tidy[c(1:3, 11:13), ]
+```
+
+## Tidying messy datasets
+
+The dataset is now tidy, i.e. ready for analysis and plotting:
+
+```{r fig.width=4, fig.height=3}
+ggplot(yields_tidy, aes(x = soiltype, y = yield)) +
+  geom_boxplot()
+```
+
+## Tidying messy datasets
+
+Sometimes we want to back-transform the data into wide format, which can be done using the `spread()` function:
+
+```{r}
+yields <- spread(yields_tidy, key = soiltype, value = yield)
+
+yields[1:3, ]
+```
+
+## Tidying messy datasets
+
+Sometimes column names include several attributes:
+
+```{r}
+yields2 <- read.table("Data/yields2.txt", sep = ";", header = TRUE)
+
+yields2[1:3, ]
+```
+
+## Tidying messy datasets
+
+After transforming it into long format, the data still is not a tidy data set ('Multiple variables are stored in one column'):
+
+```{r}
+yields2_tidy <- gather(yields2, key = soiltype, value = yield, -plotid)
+
+yields2_tidy[c(1:3, 11:13), ]
+```
+
+## Tidying messy datasets
+
+We need to split the 'soiltype' column into two columns 'soildtype' and 'grain'. This can easily be done using the `separate()` function:
+
+```{r}
+yields2_tidy <- separate(yields2_tidy, col = soiltype, into = c("soiltype", "grain"), sep = "_")
+
+yields2_tidy[c(1:3, 11:13), ]
+```
+
+Which can now be nicely plotted using ggplot2:
+
+```{r warning=FALSE, message=FALSE, fig.show='hide', warning=FALSE, message=FALSE}
+ggplot(yields2_tidy, aes(x = soiltype, y = yield, fill = grain)) +
+  geom_boxplot()
+```
+
+## Tidying messy datasets
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(yields2_tidy, aes(x = soiltype, y = yield, fill = grain)) +
+  geom_boxplot()
+```
+
+## Pipes
+
+Often we have to do many steps to wrangel our data into a tidy form, which can become messy and un-readible. This is especially true if we nest many steps into one line. Using so-called *pipes* in the **dplyr** package can help us:
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+
+yields2_tidy <- yields2 %>%
+  gather(., key = soiltype, value = yield, -plotid) %>%
+  separate(., col = soiltype, into = c("soiltype", "grain"), sep = "_")
+```
+
+The term `x <- y %>% f1(.) %>% f2(.)` is similar to `x <- f2(f1(y))`, but more readable when the the statement is long!
+
+## Mutating new variables
+
+If we want to create a new variable (column), we can use the `mutate()` function:
+
+```{r}
+yields2_tidy <- yields2_tidy %>%
+  mutate(yield_log = log(yield),
+         yield_log10 = log10(yield))
+
+yields2_tidy[1:3, ]
+```
+
+## Creating summaries
+
+If we want to create a summary of (a) variable(s), we can use the `summarize()` function:
+
+```{r}
+yields2_tidy_summary <- yields2_tidy %>%
+  summarize(yield_mean = mean(yield),
+            yield_median = median(yield))
+
+yields2_tidy_summary
+```
+
+## Grouping data
+
+Using **dyplr** we can easily calculate new variables or derive summaries of our data. However, often we want to do both wihtin specific groups, e.g. the mean/median yield within each soil-type and grain-class. We therefore need to group the data:
+
+```{r}
+yields2_tidy_summary <- yields2_tidy %>%
+  group_by(soiltype, grain) %>%
+  summarize(yield_mean = mean(yield),
+            yield_median = median(yield))
+
+yields2_tidy_summary
+```
+
+## Tibbles
+
+**Note:** The result from a dplyr call is a so-called *tibble*, which is similar to a data frame, but has some improvements. For example, it shows the data type and dimensions of the data frame, as well as it is easier to print in the console.
+
+```{r echo=FALSE}
+as_data_frame(yields_tidy)
+```
+
+
+## Grouping data
+
+We also can use the `mutate()` function within groups, e.g. for centering the yields within groups:
+
+```{r}
+yields2_tidy <- yields2_tidy %>%
+  group_by(soiltype, grain) %>%
+  mutate(yield_centered = yield - mean(yield))
+
+yields2_tidy
+```
+
+## Subsetting data
+
+Often, we also want to exclude observations (rows), which we can easily do using the `filter()` function:
+
+```{r}
+yields2_tidy_subset <- yields2_tidy %>%
+  filter(grain == "fine")
+```
+
+Similar, we can exclude variables (columns) that we don't need for further analysis using the `select()` function:
+
+```{r}
+yields2_tidy_subset <- yields2_tidy %>%
+  select(-yield_log10, -yield_log)
+```
+
+Thereby we ca either select columns or drop them using a '-' before the columns name.
+
+## More information on data wrangling using **dplyr**
+
+There are many more options in the **dplyr** package. For a nice overview please see following cheat-sheet: https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf

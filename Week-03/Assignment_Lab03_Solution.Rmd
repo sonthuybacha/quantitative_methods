@@ -1,0 +1,93 @@
+---
+title: "Assignment Lab Session 3"
+author: "Name"
+date: "Date"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+### 1. Plotting the airquality dataset
+
+Create a scatter-plot showing the relationship between temperature, solar radiation and wind speed. Briefly describe what you see.
+
+```{r warning=FALSE, message=FALSE}
+airquality <- read.table("Data/airquality.txt", sep = ",", header = TRUE)
+
+library(ggplot2)
+
+ggplot(airquality, aes(x = Temp, y = Solar, size = Wind)) +
+  geom_point()
+```
+
+Create a scatterplot showing the relationship between ozone concentration and temperature for each month. Briefly describe what you see.
+
+```{r}
+ggplot(airquality, aes(x = Temp, y = Ozone)) +
+  geom_point() +
+  facet_wrap(~Month)
+```
+
+### 2. Wrangel the airquality data
+
+Transform the airquality dataset into long-format, with a key column indicating the type of measurement and a value column giving the actual measurements (while keeping the Day, Month, and ID columns).
+
+```{r}
+library(tidyr)
+
+airquality_long <- gather(airquality, key = measurement, value = value, -Month, -Day, -ID)
+```
+
+Use the transformed dataset to simultaneously visualize the trend of ozone concentration, temperature, wind speed, and solar radiation over time. Hint: The ID column gives you a sequential index of measurement!
+
+```{r}
+ggplot(airquality_long, aes(x = ID, y = value)) +
+  geom_line() +
+  facet_wrap(~measurement, scales = "free")
+```
+
+### 4. Tree rings
+
+Import the dataset 'treering.csv'. Columns  1 to 56 contain dendrochronological time series of 56 tree cores (annual growth = tree ring widths in mm). Column 57 contains the year associated with the annual tree rings. The dendrochronological time series are of different length, e.g. not all years are observed in each tree core. The column names are the names (ids) of the tree cores.
+
+In Moodle, you'll find an example plot 'treering_example.pdf' showing time series of tree ring widths for each tree core. Create a plot that shows the exact same relationships. Hint: Use the `gather()` function to convert the dataset into the appropriate format!
+
+```{r}
+treering <- read.csv("Data/treering.csv")
+
+treering_tidy <- treering %>%
+  gather(key = plot, value = increment, -year)
+
+treering_tidy_filter <- treering_tidy %>%
+  separate(plot, into = c("X", "plot", "subplot"), sep = "_") %>%
+  dplyr::select(-X) %>%
+  dplyr::filter(plot == 40)
+
+ggplot(treering_tidy_filter, aes(x = year, y = increment, col = subplot)) +
+  geom_line() +
+  labs(x = "Year", y = "Increment [mm]", title = "Annual increment for plot 40", col = "Subplot")
+```
+
+Following, calculate the mean and standard deviation of increment for each dendrochronological time series. Hint: Use a combination of `group_by()` and `summarize()` available through the **dplyr** package. Prove your solution by showing the first 5 rows of the summary dataset!
+
+```{r}
+library(dplyr)
+
+treering_summary <- treering_tidy %>%
+  group_by(plot) %>%
+  summarize(mean_increment = mean(increment, na.rm = TRUE),
+            sd_increment = sd(increment, na.rm = TRUE))
+
+treering_summary[1:5, ]
+```
+
+Name the plots with the highest/lowest increment:
+
+```{r}
+treering_summary %>%
+  filter(mean_increment == max(mean_increment) | mean_increment == min(mean_increment))
+```
+
