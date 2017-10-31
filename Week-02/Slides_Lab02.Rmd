@@ -8,7 +8,7 @@ output:
     widescreen: yes
   beamer_presentation: default
   slidy_presentation: default
-subtitle: Quantitative Methods - Lab Session 01
+subtitle: Quantitative Methods - Lab Session 02
 header-includes: \usepackage{amsmath}
 ---
 
