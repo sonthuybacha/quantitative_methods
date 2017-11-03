@@ -91,17 +91,14 @@ Answer the following questions:
 # What is the concentration of ozone on May 20th?
 dat[dat$Month == 5 & dat$Day == 20, "Ozone"]
 
-# What is the mean temperature in July?
-temp_july <- dat[dat$Month == 7, "Temp"]
-mean(temp_july)
+# What is the mean temperature on July 16th?
+dat[dat$Month == 7 & dat$Day == 16, "Temp"]
 
-# What is the minimum and maximum concentration of ozone on in August?
-ozone_august <- dat[dat$Month == 8, "Ozone"]
-min(ozone_august, na.rm = TRUE)
-max(ozone_august, na.rm = TRUE)
+# How many days had an ozone concentration greater than 50 ppm?
+sum(dat$Ozone > 50, na.rm = TRUE)
 ```
 
-### Manipulate data (3 Points)
+### 4. Manipulate data (3 Points)
 
 Convert column `Month` (numeric) to a factor using the months names as factor labels ("May", "June", ...).
 
@@ -135,7 +132,7 @@ Write the data to a file called 'airquality2.csv' using scv format.
 write.csv(dat, file = "Data/airquality2.csv", row.names = FALSE)
 ```
 
-### Loading new data (3 points)
+### 5. Loading new data (3 points)
 
 Download the dataset 'treering.csv' from Moodle. Inspect it in either Excel or a text editor (Notepad++ for Windows or TextWrangler for Mac). Try loading the dataset into a data frame.
 

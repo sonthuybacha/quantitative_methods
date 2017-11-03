@@ -186,19 +186,15 @@ m</code></pre>
 <pre class="r"><code># What is the concentration of ozone on May 20th?
 dat[dat$Month == 5 &amp; dat$Day == 20, &quot;Ozone&quot;]</code></pre>
 <pre><code>## [1] 11</code></pre>
-<pre class="r"><code># What is the mean temperature in July?
-temp_july &lt;- dat[dat$Month == 7, &quot;Temp&quot;]
-mean(temp_july)</code></pre>
-<pre><code>## [1] 83.90323</code></pre>
-<pre class="r"><code># What is the minimum and maximum concentration of ozone on in August?
-ozone_august &lt;- dat[dat$Month == 8, &quot;Ozone&quot;]
-min(ozone_august, na.rm = TRUE)</code></pre>
-<pre><code>## [1] 9</code></pre>
-<pre class="r"><code>max(ozone_august, na.rm = TRUE)</code></pre>
-<pre><code>## [1] 168</code></pre>
+<pre class="r"><code># What is the mean temperature on July 16th?
+dat[dat$Month == 7 &amp; dat$Day == 16, &quot;Temp&quot;]</code></pre>
+<pre><code>## [1] 81</code></pre>
+<pre class="r"><code># How many days had an ozone concentration greater than 50 ppm?
+sum(dat$Ozone &gt; 50, na.rm = TRUE)</code></pre>
+<pre><code>## [1] 34</code></pre>
 </div>
 <div id="manipulate-data-3-points" class="section level3">
-<h3>Manipulate data (3 Points)</h3>
+<h3>4. Manipulate data (3 Points)</h3>
 <p>Convert column <code>Month</code> (numeric) to a factor using the months names as factor labels (“May”, “June”, …).</p>
 <pre class="r"><code>dat$Month &lt;- factor(dat$Month)
 levels(dat$Month) &lt;- c(&quot;May&quot;, &quot;June&quot;, &quot;July&quot;, &quot;August&quot;, &quot;September&quot;)</code></pre>
@@ -218,7 +214,7 @@ head(dat$Wind.ms)</code></pre>
 <pre class="r"><code>write.csv(dat, file = &quot;Data/airquality2.csv&quot;, row.names = FALSE)</code></pre>
 </div>
 <div id="loading-new-data-3-points" class="section level3">
-<h3>Loading new data (3 points)</h3>
+<h3>5. Loading new data (3 points)</h3>
 <p>Download the dataset ‘treering.csv’ from Moodle. Inspect it in either Excel or a text editor (Notepad++ for Windows or TextWrangler for Mac). Try loading the dataset into a data frame.</p>
 <pre class="r"><code>treering &lt;- read.table(&quot;Data/treering.csv&quot;, sep = &quot;;&quot;, dec = &quot;,&quot;, header = TRUE)</code></pre>
 <p>Drop all rows containing at least one <code>NA</code> value.</p>
