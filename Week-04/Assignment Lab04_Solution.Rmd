@@ -1,0 +1,95 @@
+---
+title: "Assignment Lab 04"
+author: "Cornelius Senf"
+date: "07.11.2017"
+output: html_document
+---
+
+### 1. t-Test and F-Test (2 points)
+
+Test whether the mean yield is significantely different between loam-clay and clay-sand. Beforehand, check whether the assumption of equal variances is fulfílled. If not, use a test correcting for un-equal variances. State your results in one bold statement (max 2 sentences).
+
+```{r}
+yields <- read.table("Data/yields.txt", sep = ";", header = TRUE)
+```
+
+Loam versus clay:
+
+```{r}
+var.test(yields$loam, yields$clay)
+t.test(yields$loam, yields$clay, alternative = "two.sided", var.equal = TRUE)
+```
+
+Loam versus clay:
+
+```{r}
+var.test(yields$sand, yields$clay)
+t.test(yields$sand, yields$clay, alternative = "two.sided", var.equal = TRUE)
+```
+
+There is no strong evidence for significant differences in yields between loam and clay, and between sand and clay.
+
+### 2. Build a hypothesis and research question for the airquality data (2 points)
+
+Suppose you are tasked to analyze how the variability in near-surface ozone concentrations in New York is associated with local variations in wheather conditions. With the airquality data set, plot ozone concentration (ppb) versus temperature (degrees F). Based on the observered relationship, phrase a plausable (!) research hypothesis. Hint: the statistical model you will later build represents your hypothesis. Then, based on your hypothesis, phrase a research question that you might want to address (with your regression model).
+
+```{r}
+library(ggplot2)
+
+ggplot(airquality, aes(x = Temp, y = Ozone)) +
+  geom_point()
+```
+
+Hypothesis: There is a significant effect from temperature on ozone concentration. Our null hypothesis, which we aim to reject, thus is beta_0 = 0.
+
+### 3. Fit a linear model to the airquality data (2 points)
+
+Fit a simple linear regression model using OLS between ozone concentration (y; response variable) and temperatuer (x; explanatory variable). Create a scatter plot as in task 1 and add the fitted regression line to the scatter plot. Note, you may need to take care of missing values, e.g. with na.omit().
+
+```{r}
+airquality_nona <- na.omit(airquality)
+
+x <- airquality_nona$Temp
+y <- airquality_nona$Ozone
+xm <- mean(airquality_nona$Temp) 
+ym <- mean(airquality_nona$Ozone)
+n <- nrow(airquality_nona)
+
+ssx <- sum((x - xm)^2)
+ssy <- sum((y - ym)^2)
+ssxy <- sum((x - xm) * (y - ym))
+
+slope <- ssxy / ssx
+intercept <- ym - slope * xm
+
+ggplot(airquality, aes(x = Temp, y = Ozone)) +
+  geom_point() +
+  geom_abline(intercept = intercept, slope = slope, col = "red")
+```
+
+### 4. Is the model significant? (2 points)
+
+Calculate the F-value and the p-value of the model and determine whether you reject the null hypothesis formulated above.
+
+```{r}
+sse <- sum((y - (intercept + slope * x))^2)
+ssr <- ssy - sse
+mse <- sse / (n - 2)
+f <- ssr / mse
+1 - pf(f, df1 = 1, df2 = n - 2)
+```
+
+As the p-value is very small (< 2.2e-16) we safely reject the null hypothesis. Hence, temperature has a significant effect ozon concentration.
+
+### 5. Summarize the findings (2 points)
+
+Briefly (1-2 sentences) describe the results of the fitted linear model, i.e. what is the (quantitative) effect of temperature on ozone concentration?
+
+With one degree Fahrenheit increase in temperature, we expect a mean increase in ozone concentration of 2.43911 ppm.
+
+How much does the ozone concentration increase with an average increase of 20 degrees Fahrenheit?
+
+```{r}
+20 * slope
+```
+
