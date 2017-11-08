@@ -1,5 +1,5 @@
 ---
-title: "Introduction to R"
+title: "Statistics in R"
 author: "Cornelius Senf"
 date: "cornelius.senf@geo.hu-berlin.de"
 output:
@@ -497,13 +497,13 @@ f_dist <- data.frame(f = f,
                      pf = pf(f, df1 = 1, df2 = 23))
 
 
-t_emp <- 212.8974
-t_crit <- qf(0.95, df1 = 1, df2 = 23)
+f_emp <- 212.8974
+f_crit <- qf(0.95, df1 = 1, df2 = 23)
 
 p <- ggplot(f_dist, aes(x = f, y = pf)) +
   geom_line() +
-  geom_vline(xintercept = t_emp, col = "red") +
-  geom_vline(xintercept = t_crit, col = "blue") +
+  geom_vline(xintercept = f_emp, col = "red") +
+  geom_vline(xintercept = f_crit, col = "blue") +
   labs(x = "f", y = "Cummulative F(f)")
 ```
 
@@ -518,7 +518,7 @@ print(p)
 The resulting p-value is:
 
 ```{r}
-p_value <- 1 - pf(t_emp, df1 = 1, df2 = 23)
+p_value <- 1 - pf(f_emp, df1 = 1, df2 = 23)
 p_value
 ```
 
