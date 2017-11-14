@@ -643,7 +643,7 @@ $t = \sqrt{\frac{n_{sp1}*n_{sp2}}{n_{sp1}+n_{sp2}}}*\frac{\overline{x}_{sp1}-\ov
 
 with $\overline{x}$ being the sample means, $n$ the sample size, and $S$ the weighted paired standard deviation defined as:
 
-$s^2 = \frac{(n_{sp1}-1)*s_{sp1}^{2}+(n_{sp2}-1)*s_{sp2}^{2}}{n_{sp1}+n_{sp2}-2}$
+$S = \frac{(n_{sp1}-1)*s_{sp1}^{2}+(n_{sp2}-1)*s_{sp2}^{2}}{n_{sp1}+n_{sp2}-2}$
 
 The probability that the empirical t-value deviates from zero, given $H_{0}$ is true, is described by a t-distribution, which has only one parameter, the degree of freedom: $v=n_{sp1}+n_{sp2}-2$.
 
