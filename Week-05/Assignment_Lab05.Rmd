@@ -1,0 +1,59 @@
+---
+title: "Assignment 5"
+author: ""
+date: ""
+output: html_document
+---
+
+### 1. Fit a model explaining Ozone concentration by Temperature (2 Points)
+
+Use the `lm()` function to fit a model explaining ozone concentration by temperature. Use the model to answer the following questions: (1) How does Ozone concentration change with Temperature? (2) Is the effect of temperature on ozone concentration significant? (3) How much of the varianze in ozone concentration is explained by temperature alone?
+
+```{r}
+
+```
+
+### 4. Plot the regression (1 Points)
+
+Create a plot showing the relationship between temperature and ozone concentration. Also show uncertainties caused by uncertainty in the parameter estimates.
+
+```{r}
+
+```
+
+### 3. Residual plot analysis (2 Points)
+
+Create two residual plots for the model: a histogram and a qq-plot. Do the residuals look normal and properly distributed? Answer the question in one to three sentences.
+
+```{r}
+
+
+```
+
+### 4. Transforming the response (2 Points)
+
+Create a new column 'logOzone' in the airquality dataset by calculating the natural logarithm of Ozone concentration. Following, fit a model explaining the logarithem of ozone concentration by temperature.
+
+```{r}
+
+```
+
+Check the residuals of the model. Do they look different/better/worse than for the previous model? Explain why they look different/better/worse.
+
+### 5. Predicting new data (2 Points)
+
+Use either the normal or the log-normal model (use the one you think is better given your previous experiments) to predict new data. For doing so, use the data set "temp_new.csv" provided on Moodle. The data set provides 250 new temperature observations from the same area.
+
+```{r}
+
+```
+
+Create a plot containing the original data used for fitting the model and the new data with predictions based on the model. You might want to use either two colors or two shapes to separate both data sets.
+
+```{r}
+
+```
+
+### 6. (1 Points)
+
+Research and describe (in two to three sentences) how the interpretation of the regression coefficient changes by taking the logarithm of the response variable.
