@@ -1,0 +1,115 @@
+---
+title: "Assignment 5"
+author: "Cornelius Senf"
+date: "15.11.2017"
+output: html_document
+---
+
+### 1. Fit a model explaining Ozone concentration by Temperature (2 Points)
+
+Use the `lm()` function to fit a model explaining ozone concentration by temperature. Use the model to answer the following questions: (1) How does Ozone concentration change with Temperature? (2) Is the effect of temperature on ozone concentration significant? (3) How much of the varianze in ozone concentration is explained by temperature alone?
+
+```{r}
+airquality.no.na <- na.omit(airquality)
+
+fit.airq <- lm(Ozone ~ Temp, data = airquality.no.na)
+
+summary(fit.airq)
+```
+
+(1) With a 1°C increase in temperature, ozone concentration increases on avagerage by 2.43 (± 0.23) parts per million. 
+(2) As the p-value of both the ANOVA F-test and the parameter estimate are very small (both < 2e-16), there is strong evidence for a significant effect of temperature on ozone concentration.
+(3) Temperature alone explains approximately 49% of the variabiance in ozone concentration.
+
+### 4. Plot the regression (2 Points)
+
+Create a plot showing the relationship between temperature and ozone concentration. Also show uncertainties caused by uncertainty in the parameter estimates (confidence intervall).
+
+```{r}
+library(ggplot2)
+
+ggplot(airquality.no.na, aes(x = Temp, y = Ozone)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, level = 0.95, col = "red")
+```
+
+### 3. Residual plot analysis (3 Points)
+
+Create two residual plots for the model: a qq-plot and a scatterplot of fitted values versus residuals. Do the residuals look normal and properly distributed? Answer the question in one to three sentences.
+
+```{r}
+library(dplyr)
+
+resid <- residuals(fit.airq)
+fitted <- fitted(fit.airq)
+
+fit.airq.diagnostics <- data.frame(residuals = resid,
+                                   residuals_scaled = (resid - mean(resid)) / sd(resid),
+                                   fitted = fitted)
+
+# QQ-Plot
+ggplot(fit.airq.diagnostics, aes(sample = residuals_scaled)) +
+  stat_qq() +
+  geom_abline(intercept = 0, slope = 1)
+
+# Fitted versus residuals
+ggplot(fit.airq.diagnostics, aes(x = fitted, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+The residuals deviate quite substantially from their theoretical standard normal distribution. Further, we can identfy a distinct pattern in the residuals. In particular, the residuals for low ozone concentrations are always positive, which is a result of the model predicting negative values. Negative ozone concentrations (which are impossible) lead to always positive residuals (higher than predicted).
+
+### 4. Transforming the response (3 Points in total, each part 1 point)
+
+4.1 Create a new column 'logOzone' in the airquality dataset by calculating the natural logarithm of Ozone concentration. Following, fit a model explaining the logarithem of ozone concentration by temperature.
+
+```{r}
+airquality.no.na <- airquality.no.na %>% mutate(logOzone = log(Ozone))
+
+fit.airq2 <- lm(logOzone ~ Temp, data = airquality.no.na)
+
+summary(fit.airq2)
+```
+
+4.2 Check the residuals of the model. Do they look different/better/worse than for the previous model?
+
+```{r}
+resid <- residuals(fit.airq2)
+fitted <- fitted(fit.airq2)
+
+fit.airq.diagnostics <- data.frame(residuals = resid,
+                                   residuals_scaled = (resid - mean(resid)) / sd(resid),
+                                   fitted = fitted)
+
+# QQ-Plot
+ggplot(fit.airq.diagnostics, aes(sample = residuals_scaled)) +
+  stat_qq() +
+  geom_abline(intercept = 0, slope = 1)
+
+# Fitted versus residuals
+ggplot(fit.airq.diagnostics, aes(x = fitted, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+The qq-plot indicates that -- after taking the logarithm of the ozone concentration -- the residuals are closer to their theoretical standard normal distribution. Further, the pattern of only positive residuals with low ozone concentrations disapeared. The model thus improved compared to the previous one. Also, the coefficient of determination increased (approximately 55% of the variance on log ozone concentration are explained by temperature).
+
+4.3 Plot the regression line of the logged model (without confidence intervals). You can either plot it in log-space (using the logged ozone concentrations) or back-transform the logged ozone concentrations into linear space using the exp() function (recall: exp(ln(x)) = x).
+
+```{r}
+fit.airq.diagnostics <- fit.airq.diagnostics %>% mutate(temp = airquality.no.na$Temp,
+                                                        ozone = airquality.no.na$Ozone,
+                                                        log_ozone = airquality.no.na$logOzone)
+
+# In log-space
+ggplot(fit.airq.diagnostics, aes(x = temp, y = log_ozone)) +
+  geom_point() +
+  geom_line(aes(y = fitted), col = "red")
+
+# In linear-space (exponent of fitted values: exp(ln(x)) = x)
+ggplot(fit.airq.diagnostics, aes(x = temp, y = ozone)) +
+  geom_point() +
+  geom_line(aes(y = exp(fitted)), col = "red")
+```
+

@@ -13,47 +13,39 @@ Use the `lm()` function to fit a model explaining ozone concentration by tempera
 
 ```
 
-### 4. Plot the regression (1 Points)
+### 4. Plot the regression (2 Points)
 
-Create a plot showing the relationship between temperature and ozone concentration. Also show uncertainties caused by uncertainty in the parameter estimates.
-
-```{r}
-
-```
-
-### 3. Residual plot analysis (2 Points)
-
-Create two residual plots for the model: a histogram and a qq-plot. Do the residuals look normal and properly distributed? Answer the question in one to three sentences.
-
-```{r}
-
-
-```
-
-### 4. Transforming the response (2 Points)
-
-Create a new column 'logOzone' in the airquality dataset by calculating the natural logarithm of Ozone concentration. Following, fit a model explaining the logarithem of ozone concentration by temperature.
+Create a plot showing the relationship between temperature and ozone concentration. Also show uncertainties caused by uncertainty in the parameter estimates (confidence intervall).
 
 ```{r}
 
 ```
 
-Check the residuals of the model. Do they look different/better/worse than for the previous model? Explain why they look different/better/worse.
+### 3. Residual plot analysis (3 Points)
 
-### 5. Predicting new data (2 Points)
-
-Use either the normal or the log-normal model (use the one you think is better given your previous experiments) to predict new data. For doing so, use the data set "temp_new.csv" provided on Moodle. The data set provides 250 new temperature observations from the same area.
+Create two residual plots for the model: a qq-plot and a scatterplot of fitted values versus residuals. Do the residuals look normal and properly distributed? Answer the question in one to three sentences.
 
 ```{r}
 
 ```
 
-Create a plot containing the original data used for fitting the model and the new data with predictions based on the model. You might want to use either two colors or two shapes to separate both data sets.
+### 4. Transforming the response (3 Points in total, each part 1 point)
+
+4.1 Create a new column 'logOzone' in the airquality dataset by calculating the natural logarithm of Ozone concentration. Following, fit a model explaining the logarithem of ozone concentration by temperature.
 
 ```{r}
 
 ```
 
-### 6. (1 Points)
+4.2 Check the residuals of the model. Do they look different/better/worse than for the previous model?
 
-Research and describe (in two to three sentences) how the interpretation of the regression coefficient changes by taking the logarithm of the response variable.
+```{r}
+
+```
+
+4.3 Plot the regression line of the logged model (without confidence intervals). You can either plot it in log-space (using the logged ozone concentrations) or back-transform the logged ozone concentrations into linear space using the exp() function (recall: exp(ln(x)) = x).
+
+```{r}
+
+```
+
