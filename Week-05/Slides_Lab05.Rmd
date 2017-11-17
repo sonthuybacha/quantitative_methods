@@ -428,7 +428,10 @@ With few data, however, histograms are difficult to assess! We hence often prefe
 The Quantile-Quantile Plot (QQ-Plot) plots the quantiles of the z-transformed data set over the quantiles of a standard normal distribution:
 
 ```{r, echo=T, fig.show='hide'}
-p1 <- ggplot(diagnostics.anscombe1, aes(sample = residuals)) +
+diagnostics.anscombe1 <- diagnostics.anscombe1 %>% 
+  mutate(residuals_ztrans = (residuals - mean(residuals)) / sd(residuals))
+
+p1 <- ggplot(diagnostics.anscombe1, aes(sample = residuals_ztrans)) +
   stat_qq() +
   geom_abline(intercept = 0, slope = 1)
 
@@ -436,20 +439,25 @@ diagnostics.anscombe3 <- anscombe.all %>%
   filter(dataset == "Anscombe 3") %>%
   lm(y ~ x, data = .) %>% 
   residuals(.) %>%
-  data.frame(residuals = .)
+  data.frame(residuals = .) %>% 
+  mutate(residuals_ztrans = (residuals - mean(residuals)) / sd(residuals))
 
-p3 <- ggplot(diagnostics.anscombe3, aes(sample = residuals)) +
+p3 <- ggplot(diagnostics.anscombe3, aes(sample = residuals_ztrans)) +
   stat_qq() +
   geom_abline(intercept = 0, slope = 1)
 ```
 
-If the two datasets come from the same distribution, the points should lie roughly on a line through the origin with slope 1. Interpretation takes some experience and is not always easy, especially with small sample sizes. Yet, it is one of the best methods! Try https://xiongge.shinyapps.io/QQplots/ to see the effect of deviations from normality on the QQ-plot.
+
 
 ## 4) Response residuals
 
 ```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=9, fig.align='center'}
 gridExtra::grid.arrange(p1, p3, ncol = 2)
 ```
+
+## 4) Response residuals
+
+If the two datasets come from the same distribution (the residuals are thus normally distributed), the points should lie roughly on a line through the origin with slope 1. Interpretation takes some experience and is not always easy, especially with small sample sizes. Yet, it is one of the best methods! Try https://xiongge.shinyapps.io/QQplots/ to see the effect of deviations from normality on the QQ-plot.
 
 ## 5) Functional relationship between response and predictor
 
