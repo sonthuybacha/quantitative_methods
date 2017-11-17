@@ -1,0 +1,194 @@
+---
+title: "Statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - labs Session 06
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Today's session:
+
+- Analysis of variance (ANOVA) in R
+
+# ANOVA
+
+## ANOVA in R
+
+```{r}
+yields <- read.table("Data/yields.txt", sep = ";", header = TRUE)
+
+summary(yields)
+```
+
+## ANOVA in R
+
+```{r}
+yields_tidy <- yields %>% gather(., key = soiltype, value = yield, -plotid)
+
+yields_tidy_summary <- yields_tidy %>% 
+  group_by(soiltype) %>%
+  summarize(mean = mean(yield))
+
+p <- ggplot(yields_tidy, aes(x = soiltype, y = yield)) +
+  geom_boxplot() +
+  geom_hline(yintercept = mean(yields_tidy$yield), linetype = "dashed") +
+  geom_point(data = yields_tidy_summary, aes(x = soiltype, y = mean), shape = 2)
+```
+
+## ANOVA in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## ANOVA in R
+
+ANOVA assumes variance homogeneity between groups. We can test this using a simple F-Test or using the Bartlett test (H0 is variance homogeneity):
+
+```{r}
+bartlett.test(x = yields_tidy$yield, g = yields_tidy$soiltype)
+```
+
+We do not have strong evidence to reject H0, we hence assume variance homogeneity. As always, do not solely rely on test results. Plot your data and use common sense!
+
+## ANOVA in R
+
+We can fit an ANOVA model using the function `aov()`:
+
+```{r}
+fit <- aov(yield ~ soiltype, data = yields_tidy)
+summary(fit)
+```
+
+## ANOVA in R
+
+Remember that the ANOVA is just a special case of a linear model:
+
+```{r}
+summary.lm(fit)
+```
+
+## ANOVA in R
+
+Comparing it to the mean of the yields:
+
+```{r}
+yields_tidy_summary
+```
+
+## ANOVA in R
+
+Similar to last week, we have to check the model assumptions by plotting the residuals over the fitted values:
+
+```{r, fig.show='hide'}
+yields_residuals_fitted <- data.frame(residuals = residuals(fit),
+                                      fitted = fitted(fit))
+
+p <- ggplot(data = yields_residuals_fitted,
+       aes(x = fitted, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+## ANOVA in R
+
+```{r, echo=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## ANOVA in R
+
+The assumption of normally distributed residuals can be checked using a qq-plot: 
+
+```{r}
+yields_residuals_fitted <- yields_residuals_fitted %>% 
+  mutate(residuals_ztrans = (residuals - mean(residuals)) / sd(residuals))
+
+p <- ggplot(yields_residuals_fitted, aes()) +
+  stat_qq(aes(sample = residuals_ztrans)) +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## ANOVA in R
+
+```{r, echo=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## ANOVA in R
+
+We can extract the group-means using the `model.tables()` function:
+
+```{r}
+model.tables(fit, type = "means")
+```
+
+## ANOVA in R
+
+Or we can extract the effect sizes, that is the differences in means, which is often more interesting:
+
+```{r}
+model.tables(fit, type = "effects")
+```
+
+## ANOVA in R
+
+We already know that at least two soiltypes have significantely different yields. However, it would be good to know which differences are significant. Therefore, we use **Tukey's ‘Honest Significant Difference’ Method**:
+
+```{r}
+TukeyHSD(fit)
+```
+
+## Correcting for multiple testing
+
+Why do we need to correct for multiple testing? Let's have a look at XKCD: https://xkcd.com/882/
+
+## Correcting for multiple testing
+
+By repeating a NHST on one same sample, we increase our change of making a false-positive discovery (alpha-error). 
+
+Consider a significance level of p<0.05. When doing 20 tests on the same sample, we would expect one significant results just by chance.
+
+There are several methods to correct for this issue, of which TukeyHSD is only one (see `?p.adjust` for further info).
+
+The number of hitting a false-positive increases with number of comparisons, which is not only determined by the number of tests, but also the number of data-processing steps you perform. This problem is known as the *Garden of Forking Pathes* and described in detaily here: http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf
+
+## ANOVA in R
+
+We can plot the differences in means (effect sizes) using points and errorbars:
+
+```{r}
+tukey <- as.data.frame(TukeyHSD(fit)$soiltype)
+tukey$soiltype <- rownames(tukey)
+
+p <- ggplot(tukey, aes(x = soiltype, y = diff)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.25) +
+  geom_hline(yintercept = 0) +
+  labs(x = "Soiltype", y = "Differnece in means")
+```
+
+## ANOVA in R
+
+```{r, echo=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+

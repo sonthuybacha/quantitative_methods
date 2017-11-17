@@ -1,0 +1,51 @@
+---
+title: "Assignment 6"
+author: ""
+date: ""
+output: html_document
+---
+
+# Does the diving time of cormorants differ with season and subspecies? 
+
+A team of researchers has tracked the seasonal diving time of two sub-species of cormorants (Phalocrocorax carbo). The sub-species are Phalocrocorax carbo carbo and Phalocrocorax carbo sinensis. You're asked to analyze whether there are significant differences in diving time between the two sub-species, as well as between seasons.
+
+## 1) Import and visualize the data (2 Points)
+
+Import the cormorant dataset. The dataset contains diving times (seconds) for the two subspecies. Subspecies are coded as C and S. Create a boxplot of the diving times by season and subspecies. The seasons are coded numerically as follows: 1 (Spring), 2 (Summer), 3 (Autumn), and 4 (Winter). Note, you must convert the variable season into a factor variable.
+
+```{r}
+
+```
+
+## 2) Test for variance homogeneity (2 Point)
+
+```{r}
+
+```
+
+Describe your findings in one sentence:
+
+## 3) Test the signficance of the effects of season and sub-species on diving time (2 Point)
+
+```{r}
+
+```
+
+Describe your findings in one sentence:
+
+## 4) Check the model assumptions (homoskedasticity and normality of residuals) (2 Points)
+
+```{r}
+
+```
+
+Describe your findings in 1-2 sentences.
+
+# 5) Identify which seasons differ with respect to diving time (2 Points)
+
+Conduct a multiple-comparison test to assess which seasons are significantly different from each other. Describe your findings in 1-2 sentences.
+
+```{r}
+
+```
+
