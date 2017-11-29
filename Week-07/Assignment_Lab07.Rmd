@@ -1,0 +1,50 @@
+---
+title: "Assignment 7"
+author: ""
+date: ""
+output: html_document
+---
+
+**Exercise:** In an experiment, the diameter of Tetrahymena cells (free-living ciliate protozoa) was measured in cultures of varying cell density and with and without glucose supplement (= additional energy). Using a linear regression approach, analyze the data to address the following questions: (1) Does cell concentration influence cell growth? (2) If so, does the effect vary between cell cultures with glucose supplement and witout?
+
+## 1. Import and prepare the dataset (1 Point)
+
+The data is on Moodle.
+
+```{r}
+
+```
+
+## 2. Visualize the data (2 Points)
+
+Create a scatterplot to explore the relationships between concentration, diameter and glucose supplement. Is the relationship linear? If not, how can you correct for it? Hint: Transforming a predictor might help! Briefly describe your thoughts on the relationships and the effects you might expect.
+
+```{r}
+
+```
+
+## 3. Build a simple linear model (2 Points)
+
+Build an appropriate linear model between diameter (response) and concentration (predictor) and visualize it graphically. Assess the assumptions and the goodness-of-fit of the model. Briefly describe your findings.
+
+```{r}
+
+```
+
+## 4. Multiple linear model (2 Points)
+
+Now build a multiple linear model by adding glucose as additional predictor interacting with concentration. Compare your model to the previous one based on the AIC. Does including glucose improve the model fit?
+
+```{r}
+
+```
+
+## 5. Plot the regression lines of the multiple linear model (3 Points)
+
+Plot the regression line for the multiple-regression model, that is one line for each class (glucose/no glucose).
+
+```{r}
+
+```
+
+

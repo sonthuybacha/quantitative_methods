@@ -1,0 +1,570 @@
+---
+title: "Statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - labs Session 07
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+body, td {
+   font-size: 14px;
+}
+code.r {
+  font-size: 10px;
+}
+pre {
+  font-size: 10px
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
+```
+
+## Today's session:
+
+- Multiple regression in R
+- Understanding interactions
+- Model-selection
+
+# Multiple Regression
+
+## Multiple Regression
+
+Specification of a multiple regression analysis is done by setting up a model formula with `+` between the explanatory variables. The `+` means, we are constructing a model that is additive in its predictor variables. 
+
+```{r}
+airquality_naomit <- na.omit(airquality)
+fit1 <- lm(log(Ozone) ~ Temp + Solar.R + Wind, data = airquality_naomit)
+```
+
+## Multiple Regression
+
+```{r}
+summary(fit1)
+```
+
+## Multiple Regression
+
+You can evaluate the correlation between all variables by applying the `cor()` function to a data frame. With the methods argument, you can chose between "pearson" (default), "kendall", and "spearman" correlation coefficient.
+
+```{r, warning=FALSE}
+cor(airquality_naomit[, 1:4])
+```
+
+## Multiple Regression
+
+You can obtain pairwise scatterplots between all the variables in the data set using the function `ggpairs()` in the **GGally** package. Alternatively, use the `pairs()` function in base R. 
+
+```{r, message=FALSE, warning=FALSE}
+library(GGally)
+p <- ggpairs(data = airquality_naomit, columns = 1:4)
+```
+
+## Multiple Regression
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Multiple Regression
+
+We can add more complex terms, i.e. polynomials, "on-the-fly" using the `I()` function. The `I()` function "protects" the calculation inside the `I()` function call, such that operators like `+`, `-`, `*` and `^` are not misinterpreted as formula operators. 
+
+```{r}
+fit2 <- lm(log(Ozone) ~ Temp + Solar.R + I(Solar.R^2) + Wind, data = na.omit(airquality))
+```
+
+## Multiple Regression
+
+```{r, echo=FALSE}
+summary(fit2)
+```
+
+## Multiple Regression
+
+You can use the `update()` function to add or remove predictors from a model:
+
+```{r}
+fit3 <- update(fit2, . ~ . + I(Temp^2)) # add a term from model fit2
+```
+
+```{r}
+fit2 <- update(fit3, . ~ . - I(Temp^2)) # remove a term from model fit3
+```
+
+# Interactions
+
+## Interactions
+
+A basic assumption in a multiple regression model is that terms act additively on the response. 
+
+However, this does not mean that linear models cannot describe non-additivity. 
+
+You can add special interaction terms that specify that the effect of one term is modulated according to the level of another. 
+
+In the model formulas in R, such terms are generated using the colon operator: `a:b`. 
+
+Usually, you will also include the terms `a` and `b` directly, which in R allows the shorthand notation `a*b` for `a + b + a:b`.
+
+## Interactions categorical/continous variables
+
+When an interaction between a categorical and continous variable is modeled, R internally recodes the categorical variable into multiple binary dummy variables. Each dummy variable represent a factor level. 
+
+Integrating an interaction between Temperature and Month, the equation would look like this:
+
+$log(Ozone) = \beta_0 + \beta_1Temp + \beta_2June + ... + \beta_5Sept + \beta_6(Temp:June) + ... + \beta_9(Temp:Sept) + \epsilon$
+
+The factors are always recoded into m-1 binary dummy variables, as the *base-level* is represented by the intercept and slope of of the regression line R picks the base-level alphabetically! 
+
+## Interactions categorical/continous variables
+
+If we are interested in the relationship between Temperature and Ozone for Mai, the equation reduces to:
+
+$log(Ozone) = \beta_0 + \beta_1Temp + \epsilon$
+
+where $\beta_0$ is the intercept and $\beta_1$ the slope of Temperature.
+
+If we are interested in the relationship between Temperature and Ozone for June (or some other month), the equation reduces to:
+
+$log(Ozone) = (\beta_0 + \beta_2) + (\beta_1 + \beta_6)Temp + \epsilon$
+
+where the intercept is $(\beta_0 + \beta_2)$ and the slope is $(\beta_1 + \beta_3)$.
+
+## Interactions categorical/continous variables
+
+```{r}
+airquality_naomit$Month <- factor(airquality_naomit$Month, 
+                                  labels = c("May", "June", "July", "August", "September"))
+fit <- lm(log(Ozone) ~ Temp * Month, data = airquality_naomit)
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE}
+summary(fit)
+```
+
+## Interactions categorical/continous variables
+
+To estimate ozone concentration for month May, we grab the intercept and slope term, since May is the reference factor: 
+
+$log(Ozone)_{Mai} = -2.76 + 0.08 * Temp$
+
+To estimate ozone concentration for month July, we have to add the parameters for the July intercept offset (-3.96) and the slope offset from the interaction term (0.04): 
+
+$log(Ozone)_{July} = (-2.76 - 3.96) + (0.08 + 0.04) * Temp$
+
+## Interactions categorical/continous variables
+
+Let's plot the regression lines for each factor level. First we create a plot showing the relationship between Temperature and log(Ozone):
+
+```{r, fig.show='hide'}
+p <- ggplot(airquality_naomit, aes(x = Temp, y = Ozone)) +
+  geom_point(aes(col = Month)) +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+We can create a prediction of Ozone for Mai:
+
+```{r}
+x <- seq(57, 97, length.out = 100) # Simulated temperature values from 57 to 97 Fahrenheit
+coefs <- coef(fit) # Model coefficients (log-linear model!)
+
+regressions <- data.frame(Temp = x,
+                          May = exp(coefs["(Intercept)"] + coefs["Temp"] * x)) # Backtransformed from log-scale!
+```
+
+And add the relationship as regression line to the plot:
+
+```{r}
+p <- p +
+  geom_line(data = regressions, aes(x = Temp, y = May), col = "#E41A1C") # Regression line for May
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+Following, we add the regression line for June:
+
+```{r}
+regressions <- regressions %>% 
+  mutate(June = exp((coefs["(Intercept)"] + coefs["MonthJune"] + (coefs["Temp"] + coefs["Temp:MonthJune"]) * x)))
+
+p <- p +
+  geom_line(data = regressions, aes(x = Temp, y = June), col = "#377EB8") # Regression line for June
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+And so on...
+
+```{r}
+regressions <- regressions %>% 
+  mutate(July = exp((coefs["(Intercept)"] + coefs["MonthJuly"] + (coefs["Temp"] + coefs["Temp:MonthJuly"]) * x)),
+         August = exp((coefs["(Intercept)"] + coefs["MonthAugust"] + (coefs["Temp"] + coefs["Temp:MonthAugust"]) * x)),
+         September = exp((coefs["(Intercept)"] + coefs["MonthSeptember"] + (coefs["Temp"] + coefs["Temp:MonthSeptember"]) * x)))
+
+regressions_long <- regressions %>% gather(., key = Month, value = Ozone, -Temp)
+
+p <- ggplot(airquality_naomit, aes(x = Temp, y = Ozone, col = Month)) +
+  geom_point() +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+  geom_line(data = regressions_long)
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+As always, there already exists a package doing all the hard coding-work for us. In this case, we make use of the `effect()` function in the **effects** package:
+
+```{r, warning=FALSE, message=FALSE}
+library(effects)
+
+efct <- effect(term = "Temp:Month", mod = fit)
+
+efct <- as.data.frame(efct)
+
+efct$Month <- factor(efct$Month, levels = c("May", "June", "July", "August", "September"))
+
+head(efct)
+```
+
+Note: confidence intervalls are calculated automatically. You can change the level of the confidence intervals setting the argument `confint`. See `?effect`.
+
+## Interactions categorical/continous variables
+
+Plotting the regression on the log-scale:
+
+```{r, fig.show='hide'}
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = log(Ozone), col = Month)) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Month)) +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+And confidence intervals to the plot as ribbons using `geom_ribbon()`:
+
+```{r}
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = log(Ozone), col = Month)) +
+  geom_ribbon(data = efct, aes(x = Temp, ymin = lower, ymax = upper, fill = Month), alpha = 0.2) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Month)) +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+Converting predictions back to the linear scale:
+
+```{r, fig.show='hide'}
+efct <- effect(term = "Temp:Month", mod = fit, 
+               transformation = list(link = log, inverse = exp)) # Transforming into non-log space
+
+efct <- as.data.frame(efct)
+
+efct$Month <- factor(efct$Month, levels = c("May", "June", "July", "August", "September"))
+
+p <- ggplot(airquality_naomit, aes(x = Temp, y = Ozone, col = Month)) +
+  geom_point() +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+  geom_line(data = efct, aes(y = fit))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+Increasing the simulation interval:
+
+```{r, fig.show='hide'}
+efct <- effect(term = "Temp:Month", mod = fit, 
+               transformation = list(link = log, inverse = exp), # Transforming into non-log space
+               xlevels = list(Temp = seq(57, 97, length.out = 100))) # Changing the x-levels
+
+efct <- as.data.frame(efct)
+
+efct$Month <- factor(efct$Month, levels = c("May", "June", "July", "August", "September"))
+
+p <- ggplot(airquality_naomit, aes(x = Temp, y = Ozone, col = Month)) +
+  geom_point() +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+  geom_line(data = efct, aes(y = fit))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions categorical/continous variables
+
+And finally with confidence intervals:
+
+```{r, fig.show='hide'}
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = Ozone, col = Month)) +
+  geom_ribbon(data = efct, aes(x = Temp, ymin = lower, ymax = upper, fill = Month), alpha = 0.2) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Month)) +
+  scale_color_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+```
+
+## Interactions categorical/continous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions between two continuous variables
+
+We can also specify an interaction betweem two continous variables:
+
+```{r}
+fit <- lm(log(Ozone) ~ Temp * Wind, data = airquality_naomit)
+```
+
+## Interactions between two continuous variables
+
+```{r}
+summary(fit)
+```
+
+## Interactions between two continuous variables
+
+**(Intercept)**: Log(ozone) concentration at 0 windspeed and 0 degrees temperature
+
+**Temp**: Increasing temperature by 1 degree F at a windspeed of 0 increases log(ozone) concentration by 0.08.
+
+**Wind**: Increasing windspeed by 1 mph is associated with an increase in log(ozone) concentration of 0.14, when temperature is 0.
+
+**Temp:Wind**: The effect of temperature on log(ozone) concentration decreases by -0.003 for every unit increase in windspeed. For example, at zero windspeed, the effect (slope) of temperature on log(ozone) concentration is 0.08. At a windpeed of 1 mph, the effect decreases to 0.082 - 0.003 = 0.077. 
+
+## Interactions between two continuous variables
+
+Let's start with the formula showing the additive terms for temperature ($\beta_1Temp$) and wind ($\beta_2Wind$) and the interaction term between temperature and wind ($\beta_3tw$):
+
+$log(Ozone) = \beta_0 +\beta_1Temp +\beta_2Wind +\beta_3Temp*Wind + \epsilon$
+
+We want to find the regression line between temperature and ozone for different levels of wind speed. We can rearrange the equation as follows:
+
+$y = (\beta_0 +\beta_2Wind) + (\beta_1 +\beta_3Wind) * Temp + \epsilon$
+
+Now we can say that the intercept for temperature is $(\beta_0 + \beta_2Wind)$ and the slope is $(\beta_1 + \beta_3Wind)$.
+
+## Interactions between two continuous variables
+
+We can graph the interaction using the effects package:
+
+```{r}
+efct <- effect("Temp:Wind", mod = fit, 
+               xlevels = list(Temp = seq(57, 97, length.out = 100)), 
+               transformation = list(link = log, inverse = exp))
+
+efct <- as.data.frame(efct)
+
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = Ozone, col = Wind)) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Wind, group = Wind))
+```
+
+## Interactions between two continuous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions between two continuous variables
+
+We can also change the values of the modulating variable within the `xlevels` argument:
+
+```{r}
+efct <- effect("Temp:Wind", mod = fit, 
+               xlevels = list(Temp = seq(57, 97, length.out = 100),
+                              Wind = c(0, 10, 20, 30)), # Change values of Wind
+               transformation = list(link = log, inverse = exp))
+
+efct <- as.data.frame(efct)
+
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = Ozone, col = Wind)) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Wind, group = Wind))
+```
+
+## Interactions between two continuous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Interactions between two continuous variables
+
+For interpretation, it is often much better to scale the predictors to unit scale (via z-transformation):
+
+```{r}
+airquality_naomit[, 2:4] <- scale(airquality_naomit[, 2:4]) # z-transforing Solar, Wind, Temp
+
+fit <- lm(log(Ozone) ~ Temp * Wind, data = airquality_naomit)
+```
+
+## Interactions between two continuous variables
+
+```{r, echo=FALSE}
+summary(fit)
+```
+Given the interpretation shown in the previous slides, the coefficient for Temp now indicates the increase in log(ozone) with an increase in temperature by 1 standard deviation (9.5 F) at mean windspeed (9.9 mph).
+
+## Interactions between two continuous variables
+
+Again plotting the regression model:
+
+```{r}
+efct <- effect("Temp:Wind", mod = fit, 
+               xlevels = list(Temp = seq(-2, 2, length.out = 100)), # Temp nor ranges from -2 SD to +2 SD! 
+               transformation = list(link = log, inverse = exp))
+
+efct <- as.data.frame(efct)
+
+p <- ggplot(airquality_naomit) +
+  geom_point(aes(x = Temp, y = Ozone, col = Wind)) +
+  geom_line(data = efct, aes(x = Temp, y = fit, col = Wind, group = Wind))
+```
+
+## Interactions between two continuous variables
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+# Model selection
+
+## Model selection
+
+The Akaike Informatino Criterion (AIC) balances the goodness of fit and a penalty for model complexity. AIC is defined such that the smaller the value of AIC the better the model. Compare models based on the Akaikes Information Criterion:
+
+```{r}
+AIC(fit1, fit2, fit3)
+```
+
+What is the advantage of AIC over $R^2$?
+
+## Model selection
+
+```{r}
+AIC(fit1, fit2, fit3)
+
+c(summary(fit1)$r.squared, summary(fit2)$r.squared, summary(fit3)$r.squared)
+
+c(summary(fit1)$adj.r.squared, summary(fit2)$adj.r.squared, summary(fit3)$adj.r.squared)
+```
+
+## Model selection
+
+R has several functions for performing model searches, e.g. based on the Akaike information criterion. Such functions make the process of model selection efficient, particularily when there are lots of predictor variables. From Tobias you learned manual backward and forward model selection:
+
+Backward elimination:
+
+- Start with a full model including potential transformations and polynomials
+- Work your way backwards by eliminating non-significant variables
+- Compare models using AIC and $R_{adj}$
+
+Forward elimination:
+
+- Start with a single predictor
+- Add variables and assess their significance
+- Compare models using AIC and $R_{adj}$
+
+One advantage of doing model reductions by hand is that you can impose some logical structure on the process, based on your understanding of the data and the underlying process.
+
+## Model selection
+
+I here want to show you an alternative approch to backward/forward model selection: exhaustive model comparison. Exhaustive model comparison makes use of the power of modern computers to compare all possible model combinations. For doing so, we use the function `dredge()` in the package **MuMIn**:
+
+```{r, warning=FALSE, message=FALSE}
+library(MuMIn)
+options(na.action = "na.fail")  # Prevent fitting models when data set changes due to NAs
+
+fit_full <- lm(log(Ozone) ~ (Temp * Wind + Solar.R) * Month, data = airquality_naomit)
+
+fit_all <- dredge(global.model = fit_full, rank = AIC)
+```
+
+## Model selection
+
+The result is a list of competing models:
+
+```{r, size="tiny"}
+head(fit_all, n = 5)
+```
+
+As we see, there are several models with $\Delta AIC < 4$. Hence, those models are equally likely give the data. Which one should we take as our 'true' mdoel?
+
+## Model selection
+
+We can extract the model we think is best suited for our purpose:
+
+```{r}
+model_selection <- get.models(fit_all, delta < 2) # Returns a list of models, in our case only one!
+model <- model_selection[[1]]
+model
+```
+
+Any analyse it as shown in the previous slides.
