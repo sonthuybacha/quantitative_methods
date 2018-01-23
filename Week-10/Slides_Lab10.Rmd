@@ -1,0 +1,390 @@
+---
+title: "Statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 10
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(effects)
+```
+
+## Today's session:
+
+Model checking using simulations
+
+# Simulations
+
+## Simulations
+
+Let's keep on working on the bird-count example:
+
+```{r}
+dat <- read.table("Data/bird_counts.txt", sep = ";", header = TRUE)
+fit <- glm(Y ~ relief, data = dat, family = poisson(link = "log"))
+
+efct <- effect("relief", 
+               mod = fit, 
+               xlevels = list(relief = seq(0, 4, length.out = 100)))
+efct <- as.data.frame(efct)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_ribbon(data = efct, aes(x = relief, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = efct, aes(x = relief, y = fit))
+```
+
+## Simulations
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Simulations
+
+The model just specified can be formulated as:
+
+$counts \sim Poisson(log^{-1}(\beta_0 + \beta_1 * relief))$
+
+Hence, our data at hand -- assuming the model is correct -- should be similar to a random draw from the model given the parameters we just estimated.
+
+## Simulations
+
+Drawing at random from the model given our parameters:
+
+```{r}
+params <- coef(fit)
+
+y_hat <- exp(params[1] + params[2] * unique(dat$relief))
+y_sim <- rpois(n = length(y_hat), lambda = y_hat)
+
+sim_poisson <- data.frame(relief = unique(dat$relief),
+                          y_sim.0 = y_sim)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_point(data = sim_poisson, aes(x = relief, y = y_sim.0), 
+             shape = 17, col = "red")
+```
+
+## Simulations
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Simulations
+
+The following code simply repeats the sampling for 1,000 times:
+
+```{r}
+for (i in 1:1000) {
+  sim_poisson[, paste0("y_sim.", i)] <- rpois(n = length(y_hat), lambda = y_hat)
+}
+
+sim_poisson_gather <- sim_poisson %>%
+  gather(key = simulations_number, value = simulations, -relief)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_point(data = sim_poisson_gather, aes(x = relief, y = simulations), shape = 17, alpha = 0.1, col = "red")
+```
+
+## Simulations
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Simulations
+
+Do the simulations represent our data well, that is could our data be a random draw from the model?
+
+## Simulations
+
+Our model shows signs of **overdispersion**. Overdispersion means that the data shows greater variability than would be expected based on our model.
+
+Overdispersion is pretty common with poisson regression as the poisson distribution does not have a variance term that is estimated from the data, but $var = \mu$.
+
+The same is true for binomial models, where $var = p * (1-p)$
+
+## Excursion: Overdispersion
+
+We can overcome the problem of overdispersion by using a quasipoisson data distribution, which assumes that the variance increases with the mean via a pre-defined function such as $var = \mu^2$.
+
+```{r}
+fit <- glm(Y ~ relief, data = dat, family = quasipoisson(link = "log"))
+
+efct <- effect("relief", 
+               mod = fit, 
+               xlevels = list(relief = seq(0, 4, length.out = 100)))
+efct <- as.data.frame(efct)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_ribbon(data = efct, aes(x = relief, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = efct, aes(x = relief, y = fit))
+```
+
+## Excursion: Overdispersion
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Excursion: Overdispersion
+
+The problem with quasipoisson, however, is that it uses quasi-likelihoods which prevents use from calculating several useful thinks such as the AIC. 
+
+Alternatively, we can specify a negative binomial model, which has a dispersion parameter $\theta$:
+
+$counts \sim NegBinom(log^{-1}(\beta_0 + \beta_1 * relief), \theta)$
+
+## Excursion: Overdispersion
+
+Fitting a negative binomial model in R using the `glm.nb()` function in the `MASS` package:
+
+```{r, warning=FALSE, message=FALSE}
+library(MASS)
+
+fit <- glm.nb(Y ~ relief, data = dat, link = "log")
+```
+
+## Excursion: Overdispersion
+
+```{r, echo=FALSE}
+summary(fit)
+```
+
+## Excursion: Overdispersion
+
+```{r}
+efct <- effect("relief", 
+               mod = fit, 
+               xlevels = list(relief = seq(0, 4, length.out = 100)))
+efct <- as.data.frame(efct)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_ribbon(data = efct, aes(x = relief, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = efct, aes(x = relief, y = fit))
+```
+
+## Excursion: Overdispersion
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Excursion: Overdispersion
+
+Which model is better? It is often hard to judge which model better fits the data. Drawing simulations can help better understanding the predictive behavior of the model. Besides that, experience helps.
+
+## Simulations continued
+
+Simulations can be used on all kind of models:
+
+```{r}
+dat_logit <- read.table("Data/logistic.txt", sep = "\t", header = TRUE)
+
+fit <- glm(cbind(dead, n - dead) ~ logdose, 
+           data = dat_logit, 
+           family = binomial(link = "logit"))
+
+params <- coef(fit)
+
+y_hat <- boot::inv.logit(params[1] + params[2] * dat_logit$logdose)
+sim_logit <- data.frame(logdose = dat_logit$logdose)
+
+for (i in 1:1000) {
+  sim_logit[, paste0("y_sim.", i)] <- rbinom(n = length(y_hat), size = dat_logit$n, prob = y_hat)
+}
+
+sim_logit_gather <- sim_logit %>%
+  gather(key = simulations_number, value = simulations, -logdose)
+
+p <- ggplot() +
+  geom_point(data = sim_logit_gather, aes(x = logdose, y = simulations), 
+             shape = 17, alpha = 0.1, col = "red") +
+  geom_point(data = dat_logit, aes(x = logdose, y = dead))
+```
+
+## Simulations
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Simulations
+
+```{r, warning=FALSE, message=FALSE}
+fit_ozone <- glm(Ozone ~ Temp, data = airquality, gaussian(link = "log"))
+
+params <- coef(fit_ozone)
+
+y_hat <- exp(params[1] + params[2] * airquality$Temp)
+sim_ozone <- data.frame(Temp = airquality$Temp)
+
+for (i in 1:1000) {
+  sim_ozone[, paste0("y_sim.", i)] <- rnorm(n = length(y_hat), 
+                                            mean = y_hat, 
+                                            sd = sqrt(summary(fit_ozone)$dispersion))
+}
+
+sim_ozone_gather <- sim_ozone %>%
+  gather(key = simulations_number, value = simulations, -Temp)
+
+p <- ggplot() +
+  geom_point(data = sim_ozone_gather, aes(x = Temp, y = simulations), 
+             shape = 17, alpha = 0.1, col = "red") +
+  geom_point(data = airquality, aes(x = Temp, y = Ozone))
+```
+
+## Simulations
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+
+## Model checking using DHARmA
+
+There is a package called DHARMa, which implements simulations-based model-checking. The basic steps of the DHARMa workflow are:
+
+- Simulate new data from the fitted model
+- For each observation, calculate the cumulative density function (CDF) of the simulated data
+- Calculate the residuals as the value of the CDF at the value of the observed data
+
+Assuming the model is correctly specified, all values of the CDF (ranging from 0 to 1) should appear with equal probability. The residuals should thus be uniformely distributed, which we can check by comparing the simulated residuals versus a uniform distribution using QQ-plots.
+
+The package was developed by Florian Hartig, see:  https://theoreticalecology.wordpress.com/2016/08/28/dharma-an-r-package-for-residual-diagnostics-of-glmms/
+
+## Model checking using DHARmA
+
+Checking the poisson model fit using DHARMa:
+
+```{r, fig.show=FALSE}
+library(DHARMa)
+
+fit_poisson <- glm(Y ~ relief, data = dat, family = poisson(link = "log"))
+
+sim_poisson <- simulateResiduals(fittedModel = fit_poisson, n = 250)
+
+# Create QQ-plot data
+sim_poisson <- data.frame(observed = quantile(sim_poisson$scaledResiduals, p = seq(0, 1, 0.1)),
+                          expected = punif(q = seq(0, 1, 0.1),
+                                           min(sim_poisson$scaledResiduals),
+                                           max(sim_poisson$scaledResiduals)))
+
+p <- ggplot(sim_poisson, aes(x = expected, y = observed)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## Model checking using DHARmA
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Model checking using DHARmA
+
+And comparing it to the negative binomial model:
+
+```{r, fig.show=FALSE}
+fit_negbin <- glm.nb(Y ~ relief, data = dat, link = "log")
+
+sim_negbin <- simulateResiduals(fittedModel = fit_negbin, n = 250)
+
+# Create QQ-plot data
+sim_negbin_resid <- data.frame(observed = quantile(sim_negbin$scaledResiduals, p = seq(0, 1, 0.1)),
+                               expected = punif(q = seq(0, 1, 0.1),
+                                                min(sim_negbin$scaledResiduals),
+                                                max(sim_negbin$scaledResiduals)))
+
+p <- ggplot(sim_negbin_resid, aes(x = expected, y = observed)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## Model checking using DHARmA
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Model checking using DHARmA
+
+We can also check last week's logistic regression model:
+
+```{r, fig.show=FALSE}
+dat <- read.csv("Data/infestation.csv")
+fit_logit <- glm(infested ~ temp_anomaly, data = dat, family = binomial(link = "logit"))
+
+sim_logit <- simulateResiduals(fittedModel = fit_logit, n = 250)
+
+# Create QQ-plot data
+sim_logit_resid <- data.frame(observed = quantile(sim_logit$scaledResiduals, p = seq(0, 1, 0.1)),
+                              expected = punif(q = seq(0, 1, 0.1),
+                                               min(sim_logit$scaledResiduals),
+                                               max(sim_logit$scaledResiduals)))
+
+p <- ggplot(sim_logit_resid, aes(x = expected, y = observed)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## Model checking using DHARmA
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Model checking using DHARmA
+
+Or the mortality rate model:
+
+```{r, fig.show=FALSE}
+dat <- read.table("Data/logistic.txt", sep = "\t", header = TRUE)
+
+fit_logit <- glm(cbind(dead, n - dead) ~ logdose,
+                 data = dat, 
+                 family = binomial(link = "logit"))
+
+sim_logit <- simulateResiduals(fittedModel = fit_logit, n = 250)
+
+# Create QQ-plot data
+sim_logit_resid <- data.frame(observed = quantile(sim_logit$scaledResiduals, p = seq(0, 1, 0.1)),
+                              expected = punif(q = seq(0, 1, 0.1),
+                                               min(sim_logit$scaledResiduals),
+                                               max(sim_logit$scaledResiduals)))
+
+p <- ggplot(sim_logit_resid, aes(x = expected, y = observed)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## Model checking using DHARmA
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+# No homework, happy holidays!

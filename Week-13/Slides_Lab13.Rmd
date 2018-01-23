@@ -1,0 +1,307 @@
+---
+title: "Introduction to R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 11
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## The 4 R Sessions:
+
+1. Basic concept of programming, data types, vectors and factors
+
+2. Matrices and data.frames, data import/export, graphics and visualization
+
+3. Tidy data, data wrangling
+
+4. **Today:** Spatial data in R 
+
+# Raster data in R
+
+## Raster data in R
+
+```{r message=FALSE, warning=FALSE}
+library(raster)
+```
+
+## Raster data in R
+
+```{r}
+ras <- raster(ncol = 100, nrow = 100, xmn = 0, xmx = 100, ymn = 0, ymx = 100)
+
+ras
+```
+
+## Raster data in R
+
+```{r fig.show='hide'}
+m <- rnorm(n = ncell(ras), mean = 0, sd = 1)
+
+values(ras) <- m
+
+plot(ras)
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+plot(ras)
+```
+
+## Raster data in R
+
+```{r}
+ras2 <- ras + 10
+
+ras3 <- ras * ras2
+
+ras4 <- ras^2
+
+ras5 <- (ras - cellStats(ras, stat = mean)) / 
+                                cellStats(ras, stat = sd)
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5.5, fig.width=5.5, fig.align='center'}
+par(mfrow=c(2, 2), mar=c(2.5, 2.5, 3, 3))
+plot(ras2, main = "ras + 10")
+plot(ras3, main = "ras * ras2")
+plot(ras4, main = "ras^2")
+plot(ras5, main = "z(ras)")
+```
+
+## Raster data in R
+
+```{r}
+ras.na <- ras
+
+ras.na[ras.na > 0.5] <- NA
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+plot(ras.na)
+```
+
+## Raster data in R
+
+```{r}
+k <- matrix(c(  0, 0.5, 1,
+              0.5, 1.5, 2,
+              1.5, 6.0, 3), 
+            ncol = 3, byrow = TRUE)
+k
+
+ras.reclass <- reclassify(x = ras, rcl = k)
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+plot(ras.reclass, col = c("black", "blue", "red", "green"))
+```
+
+## Raster data in R
+
+```{r}
+ras[10, 20]
+
+ras[10, 20] <- 10
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+plot(ras)
+```
+
+## Raster data in R
+
+```{r}
+ras.stack <- stack(ras, ras2)
+
+ras.stack
+```
+
+## Raster data in R
+
+```{r}
+layer1 <- subset(x = ras.stack, subset = 1)
+
+layer1
+```
+
+## Raster data in R
+
+```{r}
+data <- as.data.frame(ras.stack)
+
+head(data)
+```
+
+## Raster data in R
+
+```{r fig.show='hide', message=FALSE}
+elevation <- raster("Data/elevation.envi")
+
+elevation
+```
+
+## Raster data in R
+
+```{r}
+projection(elevation)
+```
+
+## Raster data in R
+
+```{r fig.show='hide', message=FALSE}
+plot(elevation)
+```
+
+## Raster data in R
+
+```{r, echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+plot(elevation)
+```
+
+## Raster data in R
+
+```{r}
+# use stack() or brick() for multi-layer raster files
+climate <- stack("Data/climate.envi")
+
+# get the number of raster layers
+nlayers(climate)
+
+# get the raster layer names
+names(climate)
+
+# rename the raster layers
+names(climate) <- c("Tmax", "Tmin", "Tmean", "Prec")
+```
+
+## Export raster data
+
+```{r}
+writeRaster(elevation, 
+            filename= "Data/elev.envi",
+            overwrite = TRUE)
+```
+
+# Vector data
+
+## Vector data
+
+```{r, message=TRUE, warning=TRUE}
+library(sp)
+```
+
+## Vector data: simple random sample
+
+```{r}
+coords_srs <- data.frame(x = runif(100, 17, 27), 
+                         y = runif(100, 45, 50))
+
+pts_srs <- SpatialPoints(coords = coords_srs)
+pts_srs
+```
+
+## Vector data: Assign Coordinate system
+
+```{r fig.show='hide'}
+proj <- projection(elevation)
+
+CRS(proj)
+
+pts_srs <- SpatialPoints(coords = coords_srs,
+                    proj4string = CRS(proj))
+```
+
+## Vector data
+
+```{r, echo=TRUE, results='asis', warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+plot(elevation)
+plot(pts_srs, add = TRUE)
+```
+
+## Advanced plotting
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+library(mapview)
+
+mapview(climate)
+```
+
+## Advanced plotting
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(mapview)
+mapview(climate)
+```
+
+## Vector data
+
+```{r}
+df.climate <- extract(climate, pts_srs, df = TRUE)
+
+class(df.climate)
+head(df.climate)
+```
+
+## Vector data
+
+```{r}
+spdf.climate <- extract(climate, pts_srs, sp = TRUE)
+
+spdf.climate
+```
+
+## Vector data
+
+You can acess SpatialPointsDataFrame the same way as data.frame!
+
+```{r}
+head(spdf.climate)
+
+spdf.climate$Tmax[1]
+```
+
+## Reading vector data
+
+```{r, message=FALSE, warning=FALSE}
+library(rgdal)
+```
+
+## Reading vector data
+
+```{r, message=FALSE, warning=FALSE}
+pts.sample <- readOGR('Data', 'pts_sample')
+pts.sample
+```
+
+## Writing vector data
+
+```{r, message=FALSE, warning=FALSE}
+writeOGR(spdf.climate, "Data", "pts_climate", driver = "ESRI Shapefile", overwrite_layer = TRUE)
+```

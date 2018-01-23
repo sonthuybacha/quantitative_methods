@@ -1,0 +1,256 @@
+---
+title: "Statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 08
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Today's session:
+
+- From LM to GLM
+- The GLM in R
+- Simulating data for assessing model fits
+
+# Generalized linear models
+
+## From LM to GLM
+
+Remember the airquality regression problem:
+
+$Ozone = Temp * Wind + Solar$
+
+We found that the residuals were not well distributed, because of ozone concentration being bounded to positive values. We transformed the response to overcome this problem:
+
+$log(Ozone) = Temp * Wind + Solar$
+
+However, transforming the response can make the interpretation of the model challenging, as well as the back-transformation of standard errors and confidence intervals can be difficult.
+
+## From LM to GLM
+
+The idea behind GLMs is that we transform a linear predictor:
+
+$\theta_i = \bf{X_i}\beta = \beta_{0} + \beta_{1} x_{i1} + ... + \beta_{k} x_{ik}$
+
+via a so-called *link-function* to match the data:
+
+$\hat{y_i} = g^{-1}(\theta_i) = g^{-1}(\bf{X_i}\beta)$
+
+For a simple-linear regression, the link-function is the so-called *identity* link, that is $g(\theta) = \theta$.
+
+Further, we also have to assume a data distribution, which for linear regression is Gaussian with zero mean and a variance of $\sigma$. The linear model can thus be written as:
+
+$y_i \sim N(\bf{X_i}\beta, \sigma)$
+
+## From LM to GLM
+
+Running a simple linear regression using `glm()` and comparing to `lm()`:
+
+```{r}
+fit.lm <- lm(Ozone ~ Temp * Wind, data = na.omit(airquality))
+
+fit.glm <- glm(Ozone ~ Temp * Wind, data = na.omit(airquality), family = gaussian(link = "identity"))
+```
+
+## From LM to GLM
+
+Running a simple linear regression using `glm()` and comparing to `lm()`:
+
+```{r}
+coef(fit.lm)
+
+coef(fit.glm)
+```
+
+## From LM to GLM
+
+```{r, echo=FALSE}
+summary(fit.glm)
+```
+
+## From LM to GLM
+
+Instead of transforming the response, we now define a link-function linking the linear model to the response:
+
+```{r}
+fit.glm <- glm(Ozone ~ Temp, data = na.omit(airquality), family = gaussian(link = "log"))
+```
+
+The link-function is $g(\theta) = ln(\theta)$ and the inverse is $g^{-1}(\theta) = ln^{-1}(\theta) = e^{\theta}$. The data distribution is still assumed to be normal and the model can also be written as: 
+
+$y_i \sim N(exp(\bf{X_i}\beta), \sigma)$
+
+Note the difference to a LM with log-transformed preditor:
+
+$y_i \sim exp(N(\bf{X_i}\beta, \sigma))$
+
+## From LM to GLM
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+fit.lm <- lm(log(Ozone) ~ Temp, data = na.omit(airquality))
+
+prediction <- data.frame(Temp = na.omit(airquality)$Temp,
+                         lm = predict(fit.lm, type = "response"),
+                         lm_se = predict(fit.lm, type = "response", se = TRUE)$se.fit,
+                         glm = predict(fit.glm, type = "response"),
+                         glm_se = predict(fit.glm, type = "response", se = TRUE)$se.fit)
+
+ggplot(na.omit(airquality), aes(x = Temp)) +
+  geom_point(aes(y = Ozone)) +
+  #geom_ribbon(data = prediction, aes(ymin = lm_lwr, ymax = lm_upr), fill = "red", alpha = 0.1) +
+  geom_ribbon(data = prediction, aes(ymin = exp(lm - lm_se * 2), ymax = exp(lm + lm_se * 2)), fill = "red", alpha = 0.2) +
+  geom_line(data = prediction, aes(y = exp(lm)), col = "red") +
+  geom_ribbon(data = prediction, aes(ymin = glm - glm_se * 2, ymax = glm + glm_se * 2), fill = "blue", alpha = 0.3) +
+  geom_line(data = prediction, aes(y = glm), col = "blue")
+```
+
+## From LM to GLM
+
+What are the advantages of a GLM?
+
+- Predictions (and confidence intervals) are calculated in the original data space, not in a transformed data space
+- We can select any link function fitting many data problems (bounded to positive, bounded to [0,1], ...)
+- We can specify the data distribution (think of counts, success/failure, rates, ...)
+
+# The GLM in R
+
+## The GLM in R
+
+We make use of a new data set: 
+
+```{r}
+dat <- read.table("Data/logistic.txt", sep = "\t", header = TRUE)
+
+head(dat)
+
+p <- ggplot(dat, aes(x = logdose, y = dead / n, col = product)) +
+  geom_point() +
+  scale_color_brewer(palette = "Set1") # See colorbrewer.org for palettes
+```
+
+## The GLM in R
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## The GLM in R
+
+We now aim to model the mortality-rate (boundede between 0 and 1) in response to the dose of a toxin. For doing so, we need to combine the dead and surviving cells using `cbind()`:
+
+```{r}
+fit <- glm(cbind(dead, n - dead) ~ logdose, 
+           data = dat, 
+           family = binomial(link = "logit"))
+```
+
+As link function we choose a logit-link (bounded between 0 and 1) and we assume the data to be binomial distributed (k successes given n trials).
+
+## The GLM in R
+
+```{r, echo=FALSE}
+summary(fit)
+```
+
+## The GLM in R
+
+We can create predictions from the model and overlay them on the scatterplot:
+
+```{r}
+predictions <- data.frame(logdose = dat$logdose,
+                          prediction = predict(fit, type = "response")) # Alternatively type = "link"
+
+p <- ggplot(dat, aes(x = logdose, y = dead/n)) +
+  geom_point() +
+  geom_line(data = predictions, aes(x = logdose, y = prediction))
+```
+
+## The GLM in R
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## The GLM in R
+
+Let us see if the mortality varies by toxin:
+
+```{r}
+fit <- glm(cbind(dead, n - dead) ~ logdose * product, 
+           data = dat, 
+           family = binomial(link = "logit"))
+```
+
+## The GLM in R
+
+```{r, echo=FALSE}
+summary(fit)
+```
+
+## The GLM in R
+
+We can create predictions from the model and overlay them on the scatterplot:
+
+```{r, warning=FALSE, message=FALSE}
+library(effects)
+
+predictions <- effect("logdose:product", mod = fit, xlevels = list(logdose = seq(0, 2, length.out = 100)))
+predictions <- as.data.frame(predictions)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = logdose, y = dead/n, col = product)) +
+  geom_ribbon(data = predictions, aes(x = logdose, ymin = lower, ymax = upper, fill = product), alpha = 0.2) +
+  geom_line(data = predictions, aes(x = logdose, y = fit, col = product)) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
+
+## The GLM in R
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## GLM in R
+
+We can check the residuals using the `residuals()` function. However, note that we need to look at the scaled residuals as the variance changes with the mean!
+
+```{r}
+resid <- data.frame(fitted = fitted(fit),
+                    residuals = residuals(fit, type = "pearson")) # Pearson residuals
+
+p1 <- ggplot(resid, aes(x = fitted, y = residuals)) +
+  geom_point()
+
+p2 <- ggplot(resid, aes(sample = scale(residuals))) +
+  stat_qq() +
+  geom_abline(intercept = 0, slope = 1)
+```
+
+## The GLM in R
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=10, fig.align='center'}
+print(cowplot::plot_grid(p1, p2, ncol = 2))
+```
+
+## Assignment
+
+There is no R assignment this week. However, please recap the theory and use of GLMs. We will do additional examples - with increasing complexity - next week and the week after next week.

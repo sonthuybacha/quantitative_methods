@@ -1,0 +1,29 @@
+---
+title: "Assignment 11"
+author: ""
+date: ""
+output: html_document
+---
+
+**Run a global PCA model**
+
+Download the dataset bioclim.tif from moodle (it's in a zip-file). It contains a raster stack with 19 layers of global climate variables. See http://www.worldclim.org/bioclim for the variable declaration.
+
+1) Run a PCA model on the global bioclim data set (using a sample) (3 Points): 
+
+```{r}
+
+```
+
+Apply the PCA to the raster stack. Beforehand, decide how many components to use by looking at the explained variance (3 Points): 
+
+```{r}
+
+```
+
+Map each component and decide for a decent name (e.g., north-south gradient, monsoon, etc.) (4 Points):
+
+```{r}
+
+```
+

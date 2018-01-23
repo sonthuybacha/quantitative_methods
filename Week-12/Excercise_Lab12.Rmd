@@ -1,0 +1,50 @@
+---
+title: "Excercise 17.01.2018"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output: pdf_document
+---
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Overview
+
+In todays excercise your goal is to explore and predict the climatic niche of Europes most important coniferous tree species (of the genus Picea (spruce), pinus (pine) and Abis (fir)) by contrasting them to occurences of Europes most important braodleaved tree species (of the genus Fagus (beech), Acer (Maple) and Quercus (Oak)).
+
+## Data
+
+- Occurences of tree species of the genus pinus, picea, abis, fagus, acer and quercus as CSV file (species.csv)
+- BioClim clipped to Europe (bioclim.tif)
+
+## Products to be created
+
+- Descriptive graphs of the climate niche of coniferous and braodleaved species
+- A map of of the estimated probability of coniferous species occurence (i.e., how likely is it for any pixel to contain a coniferous species over a braidleaved species)
+
+## Analysis steps
+
+- Perform a PCA on the bioclim dataset
+- Extract BioClim at plot locations
+- Develop a model predicting the probability of coniferous species occurence using the BioClim components as predictors
+- Apply the model to the PCA stack to map the probability of coniferous species occurence
+
+## Tipps and hints
+
+- For calculating the PCA use a sample of approx. 50,000 pixels as we did in last weeks course.
+- Chose only components that explain a substantial proportion of varyation.
+- Extracting the PCA values at the plot locations can be achieved by: `raster::extract(stack, plots[, c("x", "y")])`.
+- Useful graphs for exploring the climat niche might include boxplots and histograms.
+- For exploration, group species among their genus (use the `tidyr::separate()` for doing so).
+- For modelling, regroup genuses as 'coniferous' or 'braodleaved'.
+- Think about the model to use. Tipp: The response is coniferous (1) or not coniferous (0).
+
+## Finally
+
+Discuss problems in class. Ask Fabian for help.
+
+Contradictory to what I said last week, you have to submit your solution (as html created using markdown) until next weeks session (24.01.2018).
+
+Good luck!

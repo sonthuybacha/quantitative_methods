@@ -1,0 +1,41 @@
+<PAMDataset>
+  <Metadata domain="IMAGE_STRUCTURE">
+    <MDI key="INTERLEAVE">BAND</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <NoDataValue>-3.40000000000000E+38</NoDataValue>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">173.25</MDI>
+      <MDI key="STATISTICS_MEAN">nan</MDI>
+      <MDI key="STATISTICS_MINIMUM">0.083333333333333</MDI>
+      <MDI key="STATISTICS_STDDEV">nan</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="2">
+    <NoDataValue>-3.40000000000000E+38</NoDataValue>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">77.25</MDI>
+      <MDI key="STATISTICS_MEAN">nan</MDI>
+      <MDI key="STATISTICS_MINIMUM">-52.833333333333</MDI>
+      <MDI key="STATISTICS_STDDEV">nan</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="3">
+    <NoDataValue>-3.40000000000000E+38</NoDataValue>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">124.66666666667</MDI>
+      <MDI key="STATISTICS_MEAN">nan</MDI>
+      <MDI key="STATISTICS_MINIMUM">-26.416666666667</MDI>
+      <MDI key="STATISTICS_STDDEV">nan</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <NoDataValue>-3.40000000000000E+38</NoDataValue>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">146.66666666667</MDI>
+      <MDI key="STATISTICS_MEAN">nan</MDI>
+      <MDI key="STATISTICS_MINIMUM">38.416666666667</MDI>
+      <MDI key="STATISTICS_STDDEV">nan</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

@@ -1,0 +1,329 @@
+---
+title: "Statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 09
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+
+#x <- runif(30, -2, 2)
+#y <- 1.5 + 0.45 * x + runif(30, 0, 1.2)
+#y <- ifelse(y > 2, 1, 0)
+#plot(x, y)
+#write.csv(data.frame(infested = y, temp_anomaly = x), "Data/infestation.csv", row.names = FALSE)
+```
+
+## Today's session:
+
+GLM for two more data types/data generating processes:
+
+- Binary response
+- Count data
+
+## Recap generalized linear models
+
+Last week we covered GLM as a generalization of linear models. With GLMs you can freely choose how the data is linked to the model (link-function) and which data generating distribution is assumed (data distribution). We covered two models:
+
+- Log link and Gaussian distribution (ozone~temp)
+- Logit link and binomial distribution (mortality~concentration)
+
+Today we are going to cover two more common models:
+
+- Logit link and binomial distribution (known as logistic regression; binary response)
+- Log link and Poisson distribution (count data)
+
+# Logistic regression
+
+## Logistic regression
+
+We today use a dataset where the response can only take two values. The data indicates whether trees were infested by a bark beetle or not, depending on the temperature anomaly (z-transformed temperatures with values > 0 indicating hotter than average):
+
+```{r}
+dat <- read.csv("Data/infestation.csv")
+
+p <- ggplot(dat, aes(x = temp_anomaly, y = infested)) +
+  geom_point()
+```
+
+Similar problems include: dead/alive, presence/absence, conversion/conservation, etc.
+
+## Logistic regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Logistic regression
+
+We can fit a regression line explaining the relationship between temperature anomaly and infestation:
+
+```{r}
+p <- ggplot(dat, aes(x = temp_anomaly, y = infested)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Does the line fit our data problem?
+
+## Logistic regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Logistic regression
+
+It would be nice to model the probability of infestation given a certain temperature anomaly:
+
+$Pr(infestation = 1) = \beta_0 + \beta_1 * temp$
+
+Which link function do you think will best fit our problem?
+
+## Logistic regression
+
+The logit link seems well suited as it is bounded between 0 and 1 and alows for a quick transition between both extremes:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+x <- seq(-5, 5, 0.01)
+d <- data.frame(x = x, y = 1/(1 + exp(-x)))
+ggplot(d, aes(x, y)) + geom_line()
+```
+
+The regression thus can be written as:
+
+$Pr(infestation = 1) = logit^{−1}(\beta_0 + \beta_1 * temp)) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 * temp)}}$
+
+## Logistic regression
+
+In our case the data is binomial distributed. Hence, we can relate the probability of infestation modelled through the logit link to our data using a binomial distribution with one trial, which translates into the Bernoulli distribution (a special case of the binomial distribution with only two outcomes):
+
+$infestation \sim Bernoulli(logit^{−1}(\beta_0 + \beta_1 * temp)))$
+
+This model is called binomial logistic regression, there are also multinomial (three or more outcomes) and ordinal logistic regression (ordinal outcomes).
+
+## Logistic regression
+
+Fitting a logistic regression model to our data:
+
+```{r}
+fit <- glm(infested ~ temp_anomaly, data = dat, family = binomial(link = "logit"))
+```
+
+And plotting the regression line:
+
+```{r}
+prediction <- data.frame(temp_anomaly = seq(-2, 2, length.out = 100))
+prediction$fitted <- predict(object = fit, newdata = prediction, type = "response")
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = temp_anomaly, y = infested)) +
+  geom_line(data = prediction, aes(x = temp_anomaly, y = fitted))
+```
+
+## Logistic regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Logistic regression
+
+To calculate the confidence intervals we have to first calculate them on the link-scale and then backtransform them onto the predictor scale:
+
+```{r}
+pred <- predict(object = fit, newdata = prediction, 
+                type = "link", se.fit = TRUE)
+
+prediction$fitted_link <- pred$fit
+prediction$lower_link <- prediction$fitted_link - 2 * pred$se.fit
+prediction$upper_link <- prediction$fitted_link + 2 * pred$se.fit
+
+library(boot) ## Boot package for the inv.logit function
+
+prediction$link <- inv.logit(prediction$fitted_link)
+prediction$lower <- inv.logit(prediction$lower_link)
+prediction$upper <- inv.logit(prediction$upper_link)
+```
+
+And add them to the plot:
+
+```{r}
+p <- ggplot() +
+  geom_point(data = dat, aes(x = temp_anomaly, y = infested)) +
+  geom_ribbon(data = prediction, aes(x = temp_anomaly, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = prediction, aes(x = temp_anomaly, y = fitted))
+```
+
+## Logistic regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Logistic regression
+
+Alternatively, we can use the `effect()` function, which does the transformation automatically:
+
+```{r, message=FALSE, warning=FALSE}
+library(effects)
+
+efct <- effect("temp_anomaly", 
+               mod = fit, 
+               xlevels = list(temp_anomaly = seq(-2, 2, length.out = 100)))
+efct <- as.data.frame(efct)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = temp_anomaly, y = infested)) +
+  geom_ribbon(data = efct, aes(x = temp_anomaly, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = efct, aes(x = temp_anomaly, y = fit))
+```
+
+## Logistic regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Logistic regression
+
+Again, it is not straightforward to interpret coefficients in logistic regression, because the change in y given a one unit change in x is non-linear (though linear on the link scale!). However, there are - besides plotting - some ways of making the regression coefficients interpretable.
+
+## Logistic regression
+
+The **divide by 4 rule** by Gelman and Hill (2007) takes the fact that the the logistic curve is steepest at its center (which is zero given scaled predictors).
+
+```{r, echo=FALSE, fig.height=3, fig.width=4, fig.align='center'}
+x <- seq(-5, 5, length.out = 100)
+y <- exp(x) / (1 + exp(x))
+ggplot(data.frame(x, y), aes(x, y)) + 
+  geom_line() + 
+  ylab(expression(paste(logit^{-1}, (x)))) +
+  geom_vline(xintercept = 0, alpha = 0.5) +
+  geom_hline(yintercept = 0.5, alpha = 0.5)
+```
+
+As a rough estimate, we can take logistic regression coefficients and divide them by 4 to get an upper bound of the predictive difference corresponding to a unit difference in x. This upper bound is a good approximation near the midpoint of the logistic curve, where probabilities are close to 0.5.
+
+For further information see: Gelmann and Hill (2007): Data Analysis Using Regression and Multilevel/Hierarchical Models (page 82).
+
+## Logistic regression
+
+In the our example, the regression coefficient was 2.18. Dividing 2.18 by 4 yields 0.54. We can thus say that with an increase in temperature anomaly by one standard deviation, there is an expected increase in infestation probability by no more than 54%.
+
+## Logistic regression
+
+Another way to interpret logistic regression coefficients is in terms of **odds ratios**. 
+
+If an success has the probability $p$ and failure the probability of $(1 − p)$, then $p/(1 − p)$ is called the odds. Thus, the odds of success are defined as the ratio of the probability of success over the probability of failure. 
+
+An odds of 1 is equivalent to a probability of 0.5, that is equally likely outcomes (1:1). An odds of 0.5 is equivalent to a probability of 0.33, indicating there is a 1:2 chance of success/occurence An odds of 2 is eqivalent to a probability of 0.66, indicating a 2:1 change of success/occurence.
+
+## Logistic regression
+
+The ratio of two odds is called an odds ratio: $\frac{(p1/(1 − p1))}{(p2/(1 − p2))}$ The odds ratio indicates the preference of outcome A over outcome B. 
+
+**Example:** We observed a plant species in 6 out of 10 plots in landscape A and in 4 out of 10 plots in landscape B. This gives us probabilities of 0.4 and 0.6. The odds ratio of observing the plant in landscape A over observing it in landscape B is (0.6/0.4) / (0.4/0.6) = 2.25. Hence, there is a 2.25 times higher change of observaing the plant in landscape A compared to landscape B.
+
+## Logistic regression
+
+The logistic regression coefficients give the change in log odds (recall the link function ln(p/1-p)). When exponentiated, logistic regression coefficients can be interpreted as odds ratios:
+
+$OR = \frac{odds(x + 1)}{odds(x)} = \frac{e^{\beta_0 + \beta_1 * (x + 1)}}{\beta_0 + \beta_1 * x} = e^{\beta_1}$
+
+For continuous predictors, the coefficients give the change in the log odds of the outcome for a one unit increase in the predictor variable. For categorical predictors, the coefficient estimate describes the change in the log odds for each level compared to the base level. 
+
+## Logistic regression
+
+For our example:
+
+```{r}
+exp(coef(fit)[2])
+```
+
+The odds ratio idicates that with a one SD change in temperature anomaly there is a 8.83 times higher chance of infestation over no infestation.
+
+# Poisson regression
+
+## Poisson regression
+
+The following data sets shows the change in bird counts over an topographic relief gradient:
+
+```{r}
+dat <- read.table("Data/bird_counts.txt", sep = ";", header = TRUE)
+
+p <- ggplot(dat, aes(x = relief, y = Y)) +
+  geom_point()
+```
+
+## Poisson regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Poisson regression
+
+The data is bounded to positive values, a log-link is thus recommended:
+
+$counts_{expected} = log^{-1}(\beta_0 + \beta_1 * relief)$
+
+As the data can only take natural numbers (0, 1, 2, ...), we need a discrete data distrubution. For count models, the Poisson distribution is a good choice, yielding the final model of:
+
+$counts \sim Poisson(log^{-1}(\beta_0 + \beta_1 * relief))$
+
+## Poisson regression
+
+Fitting a Poisson model in R:
+
+```{r}
+fit <- glm(Y ~ relief, data = dat, family = poisson(link = "log"))
+```
+
+And plotting the regression line:
+
+```{r}
+efct <- effect("relief", 
+               mod = fit, 
+               xlevels = list(relief = seq(0, 4, length.out = 100)))
+efct <- as.data.frame(efct)
+
+p <- ggplot() +
+  geom_point(data = dat, aes(x = relief, y = Y)) +
+  geom_ribbon(data = efct, aes(x = relief, ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_line(data = efct, aes(x = relief, y = fit))
+```
+
+## Poisson regression
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Poisson regression
+
+The coefficients of the Poisson model can be interpreted easily, as the coefficients are multiplicative when backtransformed to the response scale. That is, with a one unit increase in x, the count is multiplied by the exponent of the coefficient.
+
+For our example, we expect:
+
+```{r}
+exp(coef(fit)[2])
+```
+
+a 1.4 times (or 40%) increase in mean bird counts with a one unit increase in relief.
