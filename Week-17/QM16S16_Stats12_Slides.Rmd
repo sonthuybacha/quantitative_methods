@@ -1,0 +1,198 @@
+--- 
+title: "Spatial regression in R"
+author: "Dirk Pflugmacher"
+date: "dirk.pflugmacher@geo.hu-berlin.de"
+output: 
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default 
+  slidy_presentation: default 
+subtitle: Quantitative Methods - Lab Session 16
+header-includes: \usepackage{amsmath}
+---
+
+# Spatial regression in R
+
+## Spatial regression in R
+
+This session deals with the problem of inference in (regression) models with spatial data. Inference from regression models with spatial data can be suspect. In essence this is because nearby things are similar, and it may not be fair to consider individual cases as independent (they may be pseudo-replicates). Therefore, such models need to be diagnosed before reporting them. Specifically, it is important to evaluate the for spatial autocorrelation in the residuals (as these are supposed to be independent, not correlated). If the residuals are spatially autocorrelated, this indicates that the model is misspecified. In that case you should try to improve the model by adding (and perhaps removing) important variables. If that is not possible (either because there is no data available, or because you have no clue as to what variable to look for), you can try formulating a regression model that controls for spatial autocorrelation. We show some examples of that approach here.
+
+## Generalised least squares regression
+
+In linear models of normally distributed data, spatial autocorrelation can be addressed by generalised least squares (GLS) regression. GLS directly models the spatial covariance structure in the variance-covariance matrix $\sum$, using parametric functions.
+
+As before, the underlying model is:
+
+$Y = X\beta + \epsilon$, 
+
+with the error vector $\epsilon = N(0, \sum)$.
+
+Instead of fitting individual values for the variance-covariance matrix $\sum$, a parametric correlation function is assumed. Correlation functions are isotropic, i.e. they depend only on the distance $s_{ij}$ between locations $i$ and $j$, but not on the direction.
+
+The choice of correlation function is commonly based on a visual investigation of the semi-variogram or correlogram of the residuals. Three frequently used examples of correlation functions $C(s)$ are exponential, Gaussian, and spherical.
+
+## Generalised least squares regression
+
+To conduct generalised least squares regression use the `gls()` function from the `nlme` package in R.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+library(nlme)
+?gls
+```
+
+
+## Example dataset
+
+```{r, warning=FALSE, message=FALSE}
+library(sp)
+library(gstat)
+library(ggplot2)
+library(rgdal)
+
+# read precipitation data
+precp.geo <- read.csv('Data/nieder_1981-2010_aktStandort.csv')
+
+# remove duplicate station
+precp.geo <- precp.geo[precp.geo$station_id != 13912,]
+
+# remove the high elevation station
+precp.geo <- precp.geo[precp.geo$elevation <= 2500,]
+
+# use coordinates() form sp package to add coordinates
+# converts the data.frame to a SpatialPointsDataFrame
+coordinates(precp.geo) <- c("x", "y")
+
+# Assign EPSG coordinate system code
+proj4string(precp.geo) <- CRS("+init=epsg:4326")
+
+# Transform coordinates to a European Projection with the EPGS code 3035.
+precp <- spTransform(precp.geo, CRS("+init=epsg:3035"))
+
+# Convert the SpatialPointsDataFrame back to a simple data frame
+df.precp <-data.frame(precp)
+```
+
+## Ordinary least squares regression
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+precip.lm <- lm(log(year) ~ elevation + I(elevation^2), data = df.precp)
+summary(precip.lm)
+```
+
+## Generalised least squares regression
+
+First we'll ignore spatial autocorrelation and re-fit the original model, this time using the `gls` function (instead of `lm`). The results will be the same, but we will need this model later when doing model comparisons using AIC (i.e. we can't compare the AICs from the model fit using `lm` with that fit using `gls`).
+
+```{r, eval=F, fig.align='center', fig.height=4, fig.width=4}
+precip.gls1 <- gls(log(year) ~ elevation, data = df.precp)
+summary(precip.gls1)
+```
+
+## Generalised least squares regression
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+precip.gls1 <- gls(log(year) ~ elevation + I(elevation^2), data = df.precp)
+summary(precip.gls1)
+```
+
+## Generalised least squares regression
+
+The `nlme` package also offers a variogram function. On the variogram we see that the semivariance is clearly increasing with distance. We have confirmation that spatial autocorrelation is present in our residuals.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+vario2 <- Variogram(precip.gls1, form = ~x + y, resType = "pearson")
+plot(vario2, smooth = TRUE, ylim = c(0, 1.4))
+```
+
+## Generalised least squares regression
+
+Now let's fit our model with a spatial correlation structure. This is done within the `gls` function using the `correlation` argument. We fit our model using different correlation structures, and we then use AIC to choose the best model (we also compare the initial model without correlation). Note that, as with the `Variogram` function, we need two columns in our dataframe containing the coordinates of our sites. The `nugget` argument allows us to choose wether we want a nugget effect (intercept) or not.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+precip.gls2 <- gls(log(year) ~ elevation + I(elevation^2), 
+                   correlation = corExp(form = ~x +  y, nugget = TRUE), data = df.precp)
+
+precip.gls3 <- gls(log(year) ~ elevation + I(elevation^2), 
+                   correlation = corGaus(form = ~x + y, nugget = TRUE), data = df.precp)
+
+precip.gls4 <- gls(log(year) ~ elevation + I(elevation^2), 
+                   correlation = corSpher(form = ~x + y, nugget = TRUE), data = df.precp)
+
+precip.gls5 <- gls(log(year) ~ elevation + I(elevation^2), 
+                   correlation = corLin(form = ~x + y, nugget = TRUE), data = df.precp)
+
+precip.gls6 <- gls(log(year) ~ elevation + I(elevation^2), 
+                   correlation = corRatio(form = ~x + y, nugget = TRUE), data = df.precp)
+```
+
+## Generalised least squares regression
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+AIC(precip.gls1, precip.gls2, precip.gls3, precip.gls4, precip.gls5, precip.gls6)
+```
+
+## Generalised least squares regression
+
+We can also plot the fitted variogram to check if the fit is OK.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+vario3 <- Variogram(precip.gls6, form = ~x + y, resType = "pearson")
+plot(vario3, smooth = FALSE)#, ylim = c(0, 1.2))
+```
+
+
+## Generalised least squares regression
+
+As a last check, we plot a sample variogram of the normalized residuals. These residuals are standardized residuals pre-multiplied by the inverse square-root factor of the estimated error correlation matrix. Hence we shouldn't see any trend in this new variogram if the residual spatial autocorrelation was properly accounted for.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+vario4 <- Variogram(precip.gls6, form = ~x + y, resType = "normalized", maxDist = 170000)
+plot(vario4, smooth = FALSE, ylim = c(0, 1.2))
+```
+
+## Generalised least squares regression
+
+Accounting for spatial autocorrelation using the `gls` function allows us to get unbiased parameter and uncertainty estimates. However, the modelled correlation structure is not directly used when making predictions. If we want to use the extra-information provided by spatial autocorrelation to make better predictions, we need more complex models.
+
+## Geographically Weighted regression
+
+Geographically weighted regression (GWR) is an exploratory technique mainly intended to indicate where non-stationarity is taking place on the map, that is where locally weighted regression coefficients move away from their global values. Its basis is the concern that the fitted coefficient values of a global model, fitted to all the data, may not represent detailed local variations in the data adequately.
+
+By moving a weighted window over the data, GWR estimates one set of coefficient values at every chosen ‘fit’ point. The fit points are very often the points at which observations were made, but do not have to be. If the local coefficients vary in space, it can be taken as an indication of non-stationarity.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+library(spgwr)
+```
+
+## Geographically Weighted regression
+
+GWR is fully described by Fotheringham et al. (2002) and involves first selecting a bandwidth for an isotropic spatial weights kernel, typically a Gaussian kernel with a fixed bandwidth chosen by leave-one-out cross-validation.
+
+The function `gwr.sel` finds a bandwidth for a given geographically weighted regression by optimzing a selected function. For cross-validation, this scores the root mean square prediction error for the geographically weighted regressions, choosing the bandwidth minimizing this quantity.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+bw = gwr.sel(log(year) ~ elevation, data=precp, adapt=T)
+```
+
+## Geographically Weighted regression
+
+Once the bandwidth has been found, or chosen by hand, the `gwr()` function may be used to fit the model with the chosen local kernel and bandwidth. If the data argument is passed a SpatialPolygonsDataFrame or a SpatialPointsDataFrame object, the output object will contain a component, which is an object of the same geometry populated with the local coefficient estimates. If the input objects have polygon support, the centroids of the spatial entities are taken as the basis for analysis. The function also takes a `fit.points` argument, which permits local coefficients to be created by geographically weighted regression for other support than the data points.
+
+```{r, echo=T, fig.align='center', fig.height=4, fig.width=4}
+gwr.model = gwr(log(year) ~ elevation, data=precp, adapt=bw)
+gwr.model
+```
+
+## Geographically Weighted regression
+
+```{r, echo=T, fig.align='center', fig.height=5, fig.width=5}
+spplot(gwr.model$SDF, "elevation", cuts=quantile(gwr.model$SDF$elevation), key.space = "right")
+```
+
+## Reading
+
+1. Dormann, C.F., M. McPherson, J., B. Araújo, M., Bivand, R., Bolliger, J., Carl, G., G. Davies, R., Hirzel, A., Jetz, W., Daniel Kissling, W., Kühn, I., Ohlemüller, R., R. Peres-Neto, P., Reineking, B., Schröder, B., M. Schurr, F., & Wilson, R. (2007). Methods to account for spatial autocorrelation in the analysis of species distributional data: a review. Ecography, 30, 609-628
+
+2. Beale, C.M., Lennon, J.J., Yearsley, J.M., Brewer, M.J., & Elston, D.A. (2010). Regression analysis of spatial data. Ecology Letters, 13, 246-264
+

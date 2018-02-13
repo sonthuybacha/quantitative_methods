@@ -173,6 +173,8 @@ elevation
 projection(elevation)
 ```
 
+See for projection definitions: http://spatialreference.org/
+
 ## Raster data in R
 
 ```{r fig.show='hide', message=FALSE}
@@ -188,16 +190,12 @@ plot(elevation)
 ## Raster data in R
 
 ```{r}
-# use stack() or brick() for multi-layer raster files
 climate <- stack("Data/climate.envi")
 
-# get the number of raster layers
 nlayers(climate)
 
-# get the raster layer names
 names(climate)
 
-# rename the raster layers
 names(climate) <- c("Tmax", "Tmin", "Tmean", "Prec")
 ```
 

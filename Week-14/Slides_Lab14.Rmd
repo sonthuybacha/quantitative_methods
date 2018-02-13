@@ -1,0 +1,246 @@
+---
+title: "Spatial statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 14
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Today
+
+- Descriptive point pattern analysis
+
+## Data
+
+We are going to use the tree species dataset from two weeks ago, more specifically the occurences of Abies alba (silver fir):
+
+```{r, message=FALSE, warning=FALSE}
+library(sp)
+library(raster)
+
+abies <- read.csv("data/abiesalba.csv")
+
+head(abies)
+
+abies_sp <- SpatialPoints(abies, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+
+abies_sp <- spTransform(abies_sp, CRS("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+```
+
+## Data
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(sp)
+library(raster)
+library(mapview)
+
+abies <- read.csv("data/abiesalba.csv")
+abies_sp <- SpatialPoints(abies, CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+abies_sp <- spTransform(abies_sp, CRS("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+mapview(abies_sp)
+```
+
+# Descriptive point pattern
+
+## Descriptive point pattern
+
+The centroid can easily be calculated by averaging the coordinates:
+
+```{r}
+coords <- abies_sp@coords
+coords <- as.data.frame(coords)
+
+xmean <- mean(coords[, 1])
+ymean <- mean(coords[, 2])
+
+p <- ggplot(coords, aes(x = long, y = lat)) + 
+  geom_point(alpha = 0.3) +
+  geom_point(aes(x = xmean, y = ymean), col = "red", shape = 2)
+```
+
+## Descriptive point pattern
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Descriptive point pattern
+
+We can also calculate the median of the coordinates:
+
+```{r}
+xmedian <- median(coords[, 1])
+ymedian <- median(coords[, 2])
+
+p <- ggplot(coords, aes(x = long, y = lat)) + 
+  geom_point(alpha = 0.3) +
+  geom_point(aes(x = xmean, y = ymean), col = "red", shape = 2) +
+  geom_point(aes(x = xmedian, y = ymedian), col = "blue", shape = 2)
+```
+
+## Descriptive point pattern
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p)
+```
+
+## Descriptive point pattern
+
+We can calculate the average/minimum/maximum distance between points:
+
+```{r}
+dist <- raster::pointDistance(abies_sp, longlat = FALSE)
+dist[1:3, 1:3]
+
+dist <- dist[lower.tri(dist)]
+
+c(min(dist), mean(dist), max(dist)) / 10000
+```
+
+## Point counts
+
+We can generate a grid from the points extent::
+
+```{r}
+ext <- extent(abies_sp)
+ext
+
+ras <- raster(ext)
+ras
+
+```
+
+## Point counts
+
+And set the resolution to 1000*1000 meters while keeping the projection:
+
+```{r}
+dim(ras) <- c(1000, 1000, 1)
+ras
+
+projection(ras) <- projection(abies_sp)
+```
+
+## Point counts
+
+Following we can use this raster to rasterize the points and count the number of points in each cell:
+
+```{r, eval=FALSE}
+countgrid <- rasterize(abies_sp, ras, fun = "count", background = 0)
+
+mapview(countgrid)
+```
+
+## Point counts
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+countgrid <- rasterize(abies_sp, ras, fun = "count", background = 0)
+
+mapview(countgrid)
+```
+
+## Distances as raster
+
+We can easily calculate the distances to cells with Abies. However, I first aggregate the raster to a loer resolution (otherwise it will take too long):
+
+```{r, eval=FALSE}
+abies_ras <- aggregate(countgrid, fact = 10, fun = sum)
+
+mapview(abies_ras)
+```
+
+## Distances as raster
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+abies_ras <- aggregate(countgrid, fact = 10, fun = sum)
+
+mapview(abies_ras)
+```
+
+## Distances as raster
+
+Following I set all cells containing no Abies to NA and calculate the distance:
+
+```{r, eval=FALSE}
+abies_ras[abies_ras == 0] <- NA
+
+distance_abies <- distance(abies_ras)
+
+mapview(distance_abies)
+```
+
+## Distances as raster
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+abies_ras[abies_ras == 0] <- NA
+
+distance_abies <- distance(abies_ras)
+
+mapview(distance_abies)
+```
+
+## Kernel estimates
+
+Kernel density estimates do not simply count the occurences, but 'smooth' by fitting a function (e.g., multivariate-normal) to the data. We can calculate Kernel densities as raster:
+
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(spatialEco)
+
+kernel_ras <- sp.kde(abies_sp, bw = 10000, newdata = ras)
+
+mapview(kernel_ras)
+```
+
+## Kernel estimates
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+library(spatialEco)
+
+kernel_ras <- sp.kde(abies_sp, bw = 10000, newdata = ras)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+mapview(kernel_ras)
+```
+
+## Kernel estimates
+
+ggplot2 can also estimate kernels and nicely plot them atop of Google Maps!
+
+```{r, warning=FALSE, message=TRUE}
+library(ggmap)
+
+map <- get_map(location = c(lon = mean(abies$long), lat = mean(abies$lat)), zoom = 5)
+
+p <- ggmap(map) + 
+  geom_density2d(data = abies, aes(x = long, y = lat), size = 0.3) + 
+  stat_density2d(data = abies, 
+                 aes(x = long, y = lat, fill = ..level.., alpha = ..level..), size = 0.01, 
+                 bins = 50, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0.1, 0.5), guide = FALSE)
+```
+
+## Kernel estimates
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```

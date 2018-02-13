@@ -1,0 +1,354 @@
+---
+title: "Spatial statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 15
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(sp)
+library(mapview)
+```
+
+## Today
+
+- Semivariogram
+- Kriging
+- Neighborhood definitions
+- Moran's I
+
+## Data
+
+We're today usinf the `meuse` dataset, which is provided by `sp` package. It comprises of measurements of four heavy metalsin the top soil in a flood plain along the river Meuse, along with a handful of covariates.
+
+```{r}
+data("meuse")
+
+head(meuse)
+```
+
+## Data
+
+Converting it into a spatial points object:
+
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+library(sp)
+
+coordinates(meuse) <- ~x+y
+proj4string(meuse) <- CRS("+init=epsg:28992")
+
+mapview(meuse)
+```
+
+## Data
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(sp)
+library(mapview)
+
+coordinates(meuse) <- ~x+y
+proj4string(meuse) <- CRS("+init=epsg:28992")
+
+mapview(meuse)
+```
+
+# Semivariogram
+
+## Semivariogram
+
+Semivariograms show the semivariance (variance of a variable when compared at distant locations). We can estimate an empirical semivarigrams using the `gstat` package:
+
+```{r}
+library(gstat)
+
+g <- gstat(formula = log(zinc) ~ 1, data = meuse)
+var <- variogram(g)
+
+head(var)
+```
+
+## Semivariogram
+
+Plotting the semivariogram:
+
+```{r}
+p <- ggplot(var, aes(x = dist, y = gamma, size = np)) + 
+  geom_point()
+```
+
+## Semivariogram
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+## Semivariogram
+
+We can use the empirical semivariogram to fit a theoretical function describing the semivariance at each distance. There are several models (exponential, spherical, gaussian, etc.) and we can utilize the `fit.variogram` function to derive the best-fitting model:
+
+```{r}
+var_fit <- fit.variogram(var, model = vgm(c("Exp", "Sph", "Gau")))
+
+var_fit
+```
+
+See https://cran.r-project.org/web/packages/gstat/vignettes/gstat.pdf for further information on semi-variograms!
+
+See `vgm()` for all available models.
+
+## Semivariogram
+
+Adding the theoretical semivariogram to the plot:
+
+```{r}
+vari_fit_line <- variogramLine(var_fit, maxdist = max(var$dist))
+
+p <- ggplot(var, aes(x = dist, y = gamma)) + 
+  geom_point() +
+  geom_line(data = vari_fit_line, aes(x = dist, y = gamma))
+```
+
+## Semivariogram
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+# Kriging
+
+## Kriging
+
+Kriging utilizes the theoretical semivariogram to interpolate values at any location based on distant-variance relationship. Before we can perform Kriging, we need to create a result-layer of points we want to interpolate:
+
+```{r}
+xnew <- seq(meuse@bbox[1, 1], meuse@bbox[1, 2], length.out = 50)
+ynew <- seq(meuse@bbox[2, 1], meuse@bbox[2, 2], length.out = 50)
+
+gridnew <- expand.grid(xnew, ynew)
+
+head(gridnew)
+```
+
+## Kriging
+
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
+names(gridnew) <- c("x", "y")
+coordinates(gridnew) <- ~x+y
+proj4string(gridnew) <- CRS("+init=epsg:28992")
+gridded(gridnew) <- TRUE
+
+mapview(gridnew)
+```
+
+## Kriging
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+names(gridnew) <- c("x", "y")
+coordinates(gridnew) <- ~x+y
+proj4string(gridnew) <- CRS("+init=epsg:28992")
+gridded(gridnew) <- TRUE
+
+mapview(gridnew)
+```
+
+## Kriging
+
+```{r, message=FALSE, warning=FALSE}
+kriging <- krige(log(zinc) ~ 1, meuse, gridnew, model = var_fit)
+kriging <- as.data.frame(kriging)
+
+p <- ggplot(kriging, aes(x = x, y = y)) + 
+  geom_point(aes(col = var1.pred)) +
+  scale_color_gradient(low = "yellow", high = "red") +
+  geom_point(data = as.data.frame(meuse@coords), aes(x = x, y = y)) +
+  coord_equal()
+```
+
+## Kriging
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+## Kriging
+
+We can smooth the figure by rasterizing the data:
+
+```{r}
+p <- ggplot(kriging, aes(x = x, y = y)) + 
+  geom_tile(aes(fill = var1.pred)) +
+  scale_fill_gradient(low = "yellow", high = "red") +
+  geom_point(data = as.data.frame(meuse@coords), aes(x = x, y = y)) +
+  coord_equal()
+```
+
+## Kriging
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+# Neighborhood definitions
+
+## Neighborhood definitions
+
+Using points we can define spatial neighborhoods based on their k nearest neighbors:
+
+```{r, warning=FALSE, message=FALSE}
+library(spdep)
+
+knn <- knearneigh(meuse@coords, k = 1)
+knn <- knn2nb(knn)
+knn
+```
+
+## Neighborhood definitions
+
+Maximum k of 1, 2, 3, 4:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=10, fig.align='center'}
+knn2 <- knn2nb(knearneigh(meuse@coords, k = 2))
+knn3 <- knn2nb(knearneigh(meuse@coords, k = 3))
+knn4 <- knn2nb(knearneigh(meuse@coords, k = 4))
+
+par(mfrow = c(1, 4))
+plot(knn, meuse@coords, col = "red")
+plot(knn2, meuse@coords, col = "red")
+plot(knn3, meuse@coords, col = "red")
+plot(knn4, meuse@coords, col = "red")
+```
+
+## Neighborhood definitions
+
+Similarely, we can define neighborhoods based on a radial distance:
+
+```{r}
+dnn <- dnearneigh(meuse, d1 = 0, d2 = 200)
+dnn
+```
+
+## Neighborhood definitions
+
+Maximum distances of 200, 300, 400 and 500:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=10, fig.align='center'}
+dnn2 <- dnearneigh(meuse, d1 = 0, d2 = 300)
+dnn3 <- dnearneigh(meuse, d1 = 0, d2 = 400)
+dnn4 <- dnearneigh(meuse, d1 = 0, d2 = 500)
+
+par(mfrow = c(1, 4))
+plot(dnn, meuse@coords, col = "red")
+plot(dnn2, meuse@coords, col = "red")
+plot(dnn3, meuse@coords, col = "red")
+plot(dnn4, meuse@coords, col = "red")
+```
+
+## Neighborhood definitions
+
+Similarely, we can calculate neighborhoods using polygons. Let's first load and plot a polygon of administrative units in Germany:
+
+```{r, warning=FALSE, message=FALSE}
+shp <- raster::shapefile("data/poverty_vietnam.shp")
+
+#mapview(shp)
+```
+
+The data are similar to: https://www.ecologyandsociety.org/vol13/iss2/art24/
+
+## Neighborhood definitions
+
+Neighborhoods with polygon are defined by touching edges and/or nodes:
+
+```{r}
+nb <- poly2nb(shp, queen = TRUE)
+nb
+```
+
+## Neighborhood definitions
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=4, fig.align='center'}
+plot(shp)
+plot(nb, coordinates(shp), add = TRUE, col = "red")
+```
+
+## Neighborhood definitions
+
+For more information on neighborhood definitions, see: https://cran.r-project.org/web/packages/spdep/vignettes/nb.pdf
+
+# Moran's I
+
+## Moran's I
+
+For calculating Moran's I, we first need to define a weighted neighborhood file:
+
+```{r}
+neighw <- nb2listw(nb, style = "W", zero.policy = TRUE)
+```
+
+The `zero.policy` arguments allows for units without neighbors. See `?nb2listw` for weighting styles.
+
+## Moran's I
+
+```{r, fig.show='hide'}
+moransI <- moran(shp$FGT0, neighw, n = length(nb), S0 = Szero(neighw), zero.policy = TRUE)
+
+moran.plot(shp$FGT0, neighw, zero.policy = TRUE)
+```
+
+## Moran's I
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+moran.plot(shp$FGT0, neighw, zero.policy = TRUE)
+```
+
+## Moran's I
+
+```{r}
+moran.mc(shp$FGT0, neighw, nsim = 999, zero.policy = TRUE)
+```
+
+## Moran's I
+
+```{r}
+localmoran <- localmoran(shp$FGT0, neighw, zero.policy = TRUE)
+
+head(localmoran)
+```
+
+## Moran's I
+
+```{r}
+shp@data$id <- rownames(shp@data)
+shp@data$localmoran <- localmoran[, 1]
+
+shp_df <- dplyr::left_join(fortify(shp, region = "id"), # convert to a data.frame
+                           shp@data,
+                           by = "id")
+
+p <- ggplot(shp_df, aes(x = long, y = lat, group = group, fill = localmoran)) + 
+  geom_polygon() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+  coord_equal()
+```
+
+## Moran's I
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=4, fig.align='center'}
+print(p)
+```

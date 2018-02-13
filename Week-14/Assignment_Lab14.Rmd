@@ -1,0 +1,39 @@
+---
+title: "Assignment 14"
+author: ""
+date: ""
+output: html_document
+---
+
+**Relationship between Picea Abies climate**
+
+1) Calculate the count of Abies alba trees within each Bioclim grid cell (3 Points): 
+
+Load the abies alba data and the bioclim data set used in Week 12. Create a new raster counting the number of Abies alba occurences in each grid cell.
+
+```{r}
+
+```
+
+2) Create a data frame from the data (3 Points): 
+
+Stack the bioclim and count raster. Convert the stack into a data frame where each row equals one pixel. Remove NAs. Finally, create a stratified sample containing 10% of the observations in each count class. Hint: You can combine dplyr::group_by() and dplyr::sample_frac()!
+
+```{r}
+
+```
+
+3) Build a model predicting the count of Picea Abies (3 Points)
+
+Use a Poisson model for predicting the occurence of picea abies from bioclom. Either hand-select a variable combination or run a PCA model.
+
+```{r}
+
+```
+
+4) Create a map of Picea abies counts (1 Point)
+
+```{r}
+
+```
+

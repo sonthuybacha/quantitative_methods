@@ -1,0 +1,271 @@
+---
+title: "Spatial statistics in R"
+author: "Cornelius Senf"
+date: "cornelius.senf@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 16
+header-includes: \usepackage{amsmath}
+---
+
+<style type="text/css">
+slide.backdrop {
+  background: none !important;
+  background-color: white !important;
+}
+</style>
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(sp)
+library(mapview)
+```
+
+## Today
+
+- Detecting spatial auto-correlation in regression models
+- Spatial lag models
+- Spatial error models
+
+## Spatial residual analysis
+
+Let's build a simple linear regression model predicting the zinc concentration based on the elevation and squarroot-transformed distance:
+
+```{r}
+data("meuse")
+
+fit <- lm(log(zinc) ~ elev + sqrt(dist), data = meuse)
+```
+
+## Spatial residual analysis
+
+```{r}
+summary(fit)
+```
+
+## Spatial residual analysis
+
+```{r}
+resid <- data.frame(resid = residuals(fit),
+                    fitted = fitted(fit))
+
+p1 <- ggplot(resid, aes(x = resid)) + geom_histogram()
+
+p2 <- ggplot(resid, aes(x = 1:nrow(meuse), y = resid)) + geom_point()
+
+p3 <- ggplot(resid, aes(x = fitted, y = resid)) + geom_point()
+```
+
+## Spatial residual analysis
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+print(p1)
+```
+
+## Spatial residual analysis
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p2)
+```
+
+## Spatial residual analysis
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p3)
+```
+
+## Spatial residual analysis
+
+The residuals look fine. There's no serial correlation or heteroskedasticity. However, are the residuals spatially independent?
+
+```{r}
+meuse$residuals <- fit$residuals
+
+p <- ggplot(meuse, aes(x = x, y = y, col = residuals, size = residuals)) +
+  geom_point() +
+  scale_color_gradient2()
+```
+
+## Spatial residual analysis
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Spatial residual analysis
+
+Testing for spatial autocorrelation:
+
+```{r, warning=FALSE, message=FALSE}
+library(spdep)
+
+dnn <- dnearneigh(as.matrix(meuse[,c("x", "y")]), d1 = 0, d2 = 200)
+neighw <- nb2listw(dnn, style = "W", zero.policy = TRUE)
+moran <- moran.mc(fit$residuals, neighw, nsim = 999, zero.policy = TRUE)
+
+moran
+```
+
+## Spatial residual analysis
+
+Sensitivity analysis:
+
+```{r}
+moran_I <- c()
+
+for (d in seq(50, 2000, 50)) {
+  dnn <- dnearneigh(as.matrix(meuse[,c("x", "y")]), d1 = 0, d2 = d)
+  neighw <- nb2listw(dnn, style = "W", zero.policy = TRUE)
+  moran <- moran.mc(fit$residuals, neighw, nsim = 999, zero.policy = TRUE)
+  moran_I <- c(moran_I, moran$statistic)
+}
+
+moran_I <- data.frame(moran = moran_I, 
+                      distance = seq(50, 2000, 50))
+
+p <- ggplot(moran_I, aes(x = distance, y = moran)) + 
+  geom_point() +
+  geom_line()
+```
+
+## Spatial residual analysis
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+## Spatial regression models
+
+We can use spatial lag models (or spatial simultaneous autoregressive lag model) to encounter spatial auto-correlation in the residuals. Spatial lag models incorporate an additional parameter of lagged y-values:
+
+$y = \rho * W * y + X\beta + e$ with $e \sim N(0, \sigma)$
+
+Where $\rho$ estimates the influence of neighboring values of y and $W$ defines a weighted neighborhood matrix.
+
+## Spatial regression models
+
+Building a spatial lag model in R is easy using the `lagsarlm()` function in the `spdep` package:
+
+```{r}
+dnn <- dnearneigh(as.matrix(meuse[,c("x", "y")]), d1 = 0, d2 = 400)
+neighw <- nb2listw(dnn, style = "W", zero.policy = TRUE)
+
+fit_sp1 <- lagsarlm(log(zinc) ~ elev + sqrt(dist), data = meuse, listw = neighw, zero.policy = TRUE)
+```
+
+##
+
+```{r, echo=FALSE}
+summary(fit_sp1)
+```
+
+## Spatial regression models
+
+```{r}
+meuse$residuals_sp1 <- fit_sp1$residuals
+
+p <- ggplot(meuse, aes(x = x, y = y, col = residuals_sp1, size = residuals)) +
+  geom_point() +
+  scale_color_gradient2()
+```
+
+## Spatial regression models
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Spatial regression models
+
+The spatial lag model didn't account for our spatially auto-correlated residuals. Alternatively, we can use spatial error model, which incorporate an additional parameter of lagged residual values:
+
+$y = X\beta + u$ with $U = \lambda * W * u + e$ and $e ~ N(0, \sigma)$
+
+## Spatial regression models
+
+Building a spatial error model in R is easy using the `errorsarlm()` function in the `spdep` package:
+
+```{r}
+dnn <- dnearneigh(as.matrix(meuse[,c("x", "y")]), d1 = 0, d2 = 400)
+neighw <- nb2listw(dnn, style = "W", zero.policy = TRUE)
+
+fit_sp2 <- errorsarlm(log(zinc) ~ elev + sqrt(dist), data = meuse, listw = neighw, zero.policy = TRUE)
+```
+
+##
+
+```{r, echo = FALSE}
+summary(fit_sp2)
+```
+
+## Spatial regression models
+
+```{r}
+meuse$residuals_sp2 <- fit_sp2$residuals
+
+p <- ggplot(meuse, aes(x = x, y = y, col = residuals_sp2, size = residuals)) +
+  geom_point() +
+  scale_color_gradient2()
+```
+
+## Spatial regression models
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=6, fig.align='center'}
+print(p)
+```
+
+## Spatial regression models
+
+```{r}
+moran_I <- c()
+moran_I_sp1 <- c()
+moran_I_sp2 <- c()
+
+for (d in seq(50, 2000, 50)) {
+  dnn <- dnearneigh(as.matrix(meuse[,c("x", "y")]), d1 = 0, d2 = d)
+  neighw <- nb2listw(dnn, style = "W", zero.policy = TRUE)
+  
+  moran <- moran.mc(fit$residuals, neighw, nsim = 999, zero.policy = TRUE)
+  moran_I <- c(moran_I, moran$statistic)
+  
+  moran_sp1 <- moran.mc(fit_sp1$residuals, neighw, nsim = 999, zero.policy = TRUE)
+  moran_I_sp1 <- c(moran_I_sp1, moran_sp1$statistic)
+  
+  moran_sp2 <- moran.mc(fit_sp2$residuals, neighw, nsim = 999, zero.policy = TRUE)
+  moran_I_sp2 <- c(moran_I_sp2, moran_sp2$statistic)
+}
+```
+
+## Spatial regression models
+
+```{r}
+moran_I <- data.frame(moran = moran_I, 
+                      moran_sp1 = moran_I_sp1, 
+                      moran_sp2 = moran_I_sp2, 
+                      distance = seq(50, 2000, 50))
+
+p <- ggplot(moran_I) + 
+  geom_point(aes(x = distance, y = moran)) +
+  geom_line(aes(x = distance, y = moran)) + 
+  geom_point(aes(x = distance, y = moran_sp1), col = "red") +
+  geom_line(aes(x = distance, y = moran_sp1), col = "red") + 
+  geom_point(aes(x = distance, y = moran_sp2), col = "blue") +
+  geom_line(aes(x = distance, y = moran_sp2), col = "blue")
+```
+
+## Spatial regression models
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=5, fig.width=7, fig.align='center'}
+print(p)
+```
+
+## Spatial regression models
+
+```{r}
+AIC(fit, fit_sp1, fit_sp2)
+```
