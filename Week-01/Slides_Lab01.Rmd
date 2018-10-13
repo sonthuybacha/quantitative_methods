@@ -1,7 +1,6 @@
 ---
 title: "Introduction to R"
-author: "Cornelius Senf"
-date: "cornelius.senf@geo.hu-berlin.de"
+author: "Cornelius Senf and Dirk Pfugmacher"
 output:
   ioslides_presentation:
     smaller: yes
@@ -490,3 +489,4 @@ Note, you cannot simply add values to a factor that are not specified in `levels
 treespecies[1] <- "Oak"
 treespecies
 ```
+

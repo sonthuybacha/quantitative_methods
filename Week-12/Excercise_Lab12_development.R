@@ -26,6 +26,8 @@ abies <- list.files("Week-12/occurrences/", pattern = glob2rx("Abies*shp"), full
   bind_rows(.id = "species") %>%
   dplyr::rename(x = V1, y = V2)
 
+write_csv(abies[[1]], "Week-14/data/abiesalba.csv")
+
 fagus <- list.files("Week-12/occurrences/", pattern = glob2rx("Fagus*shp"), full.names = TRUE) %>%
   map(~ sf::read_sf(.)) %>%
   map(~ do.call(rbind, st_geometry(.))) %>%

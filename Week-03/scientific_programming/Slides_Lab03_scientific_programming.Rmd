@@ -1,0 +1,377 @@
+---
+title: "Introduction to R"
+author: "Dirk Pflugmacher"
+date: "dirk.pflugmacher@geo.hu-berlin.de"
+output:
+  ioslides_presentation:
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+subtitle: Quantitative Methods - Lab Session 03
+header-includes: \usepackage{amsmath}
+---
+
+# Writing R Programs
+
+## Flow control
+
+- Until now, we have seen components of the R language that cause evaluation of single expressions.
+
+```{r}
+i <- sqrt(9)
+```
+
+- Remember, expression can consitute a mathematical operation, a logical condition, or any function for that matter.
+- However, R is a true programming language that allows **conditional execution** and **looping constructs** as well. 
+
+## Flow control: *conditions*
+
+In previous sessions we learned about logical vectors and operators and that they can be used to perform different operations on different parts of a vector or data frame. 
+
+```{r}
+tab <- read.table("Data/airquality_output.txt", sep = ";", dec = ".", header = TRUE)
+airquality$TempClass <- rep("", nrow(airquality))
+airquality[airquality$Temp >= 70 , "TempClass"] <- "warm"
+airquality[airquality$Temp < 70 , "TempClass"] <- "cold"
+airquality$TempClass <- factor(airquality$TempClass)
+```
+
+## Flow control: *conditions*
+
+With the `if()` statement you can also control which statements are executed, and sometimes this is more convenient. 
+
+
+```{r}
+i <- 55
+
+if (i < 50) {
+  print("Less than 50")
+} else {
+  print("Greater than 50")
+}
+```
+
+
+## Flow control: *conditions*
+
+You can combine multiple logical operations:
+
+```{r}
+i <- 55
+
+if (i < 50) {
+  print("Kleiner 50")
+} else if ( i >= 50 & i < 70){
+  print("Greater than 50 and less than 70")
+} else {
+  print("Greater than 70")
+}
+```
+
+## Loops
+
+The `for()` statement allows you to specify that a certain operation should be repeated a fixed number of times.
+
+```{r}
+x <- c(5, 4, 8)
+for (i in x) {
+  print(i^2)
+}
+```
+
+The above example iteratively sets the variable `i` equal to each of the elements of vector `x`. For example, in the first loop iteration `i=5`, in the second iteration `i=4`, in the third and last iteration `i=8`. For each iteration, whatever commands are listed within the curly braces will be performed. The curly braces serve to group the commands so that they are treated by R as a single command.
+
+## Loops
+
+You can collect the results of the loop in a new variable. Based on the previous example, you may append the result of each iteration to a new vector `x_quadrat`.
+
+
+```{r}
+x <- c(5, 4, 8)
+
+x_quadrat <- c() # create an empty vector to hold the results
+
+for(i in x){
+  #append the result to x_quadrat and store the new vector in x_quadrat
+  x_quadrat <- c(x_quadrat, i^2)
+}
+x_quadrat
+```
+
+## Loops
+
+Often it is more efficient and convinient to loop through an index vector rather than through a data vector. This way you can use indices to extract and store information from multiple variables (e.g. data frame columns). In the example below, `i` will loop through the vector c(1, 2, 3).
+
+```{r}
+x <- c(5, 4, 8)
+y <- c(7, 2, 1)
+
+xy_product = rep(NA, length(y))
+
+for(i in 1:length(x)){
+  xy_product[i] <- x[i] + y[i]
+}
+
+xy_product
+```
+
+## Loops
+
+You can combine conditions and loops:
+
+```{r}
+# 100 random numbers between 1 and 100 sampled from a uniform distribution
+random <- runif(100, min=1, max=100) 
+
+count <- 0
+
+for (i in random) {
+  if (i < 50) {
+    count <- count + 1
+  }
+}
+
+count
+```
+
+## Loops
+
+The `while()` function loops through an operation as long as a specified condition is true.
+
+```{r}
+i <- 0
+
+while (i < 50) {
+  i <- i + 10
+  print(i)
+}
+```
+
+## Loops vs vectorized operations
+
+Can we conduct these vectorized operations with loops and conditions? 
+
+```{r}
+airquality$TempClass <- rep("", nrow(airquality))
+airquality[airquality$Temp >= 70 , "TempClass"] <- "warm"
+airquality[airquality$Temp < 70 , "TempClass"] <- "cold"
+airquality$TempClass <- factor(airquality$TempClass)
+```
+
+Yes, we could achieve the same result by looping through rows with `for()` and then assigning classes using conditional statments with `if()`. However, loops are usully less efficient than vectorized operations in R!
+
+## Functions
+
+Functions are self-contained units with a well-defined purpose. In general, functions take inputs, do calculations (possibly printing intermediate results, drawing graphs, calling other functions, etc.), and produce outputs. The best thing is: You can write your own!
+
+```{r}
+my_addition_function <- function(x, y){
+  z <- x + y
+  return(z)
+}
+
+my_addition_function(x = 2, y = 4)
+```
+
+When the function is completed, all variables declared inside the function are gone. For example, the variable `z` is not known outside the scope of the function. To pass back results you can use `return()`.
+
+## Functions
+
+You can specify default values for variables as follows:
+
+```{r}
+my_addition_function <- function(x , y = 5){
+  z <- x + y
+  return(z)
+}
+
+my_addition_function(x = 2)
+```
+
+Those defaults are overwritten, if you pass it another value:
+
+```{r}
+my_addition_function(x = 2, y = 8)
+```
+
+## Functions
+
+Functions can include loops and conditions:
+
+```{r}
+my_addition_function <- function(x, y, calculate = TRUE){
+  if(calculate == TRUE){
+    return(x + y)  
+  }else if(calculate == FALSE){
+    print("Nothing to calculate.")
+  }
+}
+
+my_addition_function(x = 2, y = 3)
+
+my_addition_function(x = 2, y = 3, calculate = FALSE)
+```
+
+## Functions
+
+Usefull functions that are already integrated in R:
+
+- `mean()`: Mittelwert
+- `sum()`: Summe
+- `var()`: Varianz
+- `sd()`: Standardabweichung
+- `median()`: Median
+- `quantile()`: Quantile
+- ...
+
+## Functions
+
+Lets write our own function for calculating the mean:
+
+```{r}
+mean(airquality$Temp)
+
+my_mean <- function(x){
+  mw <- sum(x, na.rm = TRUE) / length(x)
+  return(mw)
+}
+
+my_mean(airquality$Temp)
+
+```
+
+## Functions
+
+Note, the `mean()` function provides an argument to ignore missing values. Ours does not!
+
+```{r}
+mean(airquality$Ozone, na.rm = TRUE)
+my_mean(airquality$Ozone)
+```
+
+## Functions
+
+But we can fix that:
+
+```{r}
+mean(airquality$Ozone, na.rm = TRUE)
+
+my_mean <- function(x){
+  mw <- sum(x, na.rm = TRUE) / sum(!is.na(airquality$Ozone))
+  return(mw)
+}
+
+my_mean(airquality$Ozone)
+
+```
+
+## Variable scope
+
+The "scope" of a variable tells us where the variable would be recognized. We already discussed, variables inside functions are not known outside the function, i.e. they have a local scope (unless you declare them as global)!
+
+HOWEVER: Variables defined at the console have global scope, meaning they are visible in any user-defined function. See variable `a` below. This can lead to unexpected results if you do not watch out.
+
+```{r}
+a = 10
+my_addition_function <- function(x, y){
+  z <- x + y + a
+  return(z)
+}
+
+my_addition_function(x=2, y=4)
+```
+
+## Applying functions to matrices and data frames
+
+The `apply()` function applies function to all rows or columns of a matrix or data frame:
+
+```{r}
+m <- matrix(1:9, nrow = 3)
+
+apply(m, MARGIN = 1, FUN = mean)
+apply(m, MARGIN = 2, FUN = mean)
+```
+
+The function must return a (single) scalar value. The resulting vector has length equal to `nrow()` or `ncol()`
+
+## Applying functions to matrices and data frames
+
+The `lapply()` function applies a function to each element of a list:
+
+```{r}
+lapply(list(a = 1, b = 2, c = 3), FUN = function(x){x * 2})
+```
+
+The result is also a list. The `sapply()` is a more user-friendly version of `lapply()` that returns simplefied results.
+
+
+## Examples: `apply()`
+
+Calculate the mean growth for each year from the treering dataset:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+library(ggplot2)
+
+treering <- read.csv("Data/treering.csv")
+
+growth_mean <- apply(treering[, 1:56], MARGIN = 1, FUN = mean, na.rm = TRUE)
+
+ggplot(data = data.frame(Year = treering$Year, 
+                         GrowthMean = growth_mean), 
+       aes(x = Year, y = GrowthMean)) +
+       geom_point()
+```
+
+## Examples: `apply()`
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = data.frame(Year = treering$Year, 
+                         GrowthMean = growth_mean), 
+       aes(x = Year, y = GrowthMean)) +
+  geom_point()
+```
+
+## Examples: `apply()`
+
+We can also estimate and plot the 95% confidence interval:
+
+```{r fig.show='hide', warning=FALSE, message=FALSE}
+se <- function(x){sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))}
+growth_se <- apply(treering[, 1:56], MARGIN = 1, FUN = se)
+
+ggplot(data = data.frame(Year = treering$Year, 
+                         GrowthMean = growth_mean,
+                         SE = growth_se), 
+       aes(x = Year, y = GrowthMean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = GrowthMean - 1.96 * SE, ymax = GrowthMean + 1.96 * SE))
+```
+
+## Examples: `apply()`
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+ggplot(data = data.frame(Year = treering$Year, 
+                         GrowthMean = growth_mean,
+                         SE = growth_se), 
+       aes(x = Year, y = GrowthMean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = GrowthMean - 1.96 * SE, ymax = GrowthMean + 1.96 * SE))
+```
+
+## Die `tapply()` Funktion
+
+The `tapply()` funktion applies a function to each element of a vector grouped by a second vector:
+
+```{r}
+tapply(1:9, INDEX = c(1, 1, 1, 2, 2, 2, 3, 3, 3), FUN = mean)
+```
+
+## Examples: `tapply()`
+
+We can use `tapply()` to calculate mean and standard deviation of ozone concentration for each month:
+
+```{r}
+tapply(airquality$Ozone, INDEX = airquality$Month, FUN = mean, na.rm = TRUE)
+tapply(airquality$Ozone, INDEX = airquality$Month, FUN = sd, na.rm = TRUE)
+```

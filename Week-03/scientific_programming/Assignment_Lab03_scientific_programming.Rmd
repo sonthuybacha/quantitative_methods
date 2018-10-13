@@ -1,0 +1,89 @@
+---
+title: "Assignment 3"
+author: "Name"
+date: "Datum"
+output: html_document
+---
+
+### Tutor: Wilhelm Furian
+wilhelm.furian@student.hu-berlin.de
+
+### Steps:
+
+1. Complete the tasks. Write your R code in the designated areas.
+2. Create an HTML file in R-Studio: | Menu | File | Knit Document 
+3. RENAME the file: lastname_assignment3.html
+4. Upload your assignment to Moodle
+
+### 1. Write a function that calculates the 95% confidence interval
+
+```{r}
+
+```
+
+### 2. Mean and standard deviation
+
+Use the `apply()` function to calculate the sample mean and standard deviation of 'Ozone', 'Solar', 'Temp', and 'Wind':
+
+```{r}
+
+```
+
+### 3. Daily climate observations
+
+Download the file 'daily_observation_potsdam_1893_2012.txt' from Moodle. Find out how the data is formated and structured by opening the file in a text editor. Then, import the file into R. Note, you do not have to edit the text file in order to import it. How many observations does the dataset contain?
+
+```{r}
+
+```
+
+### 4. Date
+
+From the column 'Mess_Datum' (measurement date), create three new columns: 'Year', 'Month', and 'Day'. Hint: Use the `substring()` function!
+
+```{r}
+
+```
+
+### 5. Date range
+
+What is the earliest and latest year at which measurements were taken? Write an expression to extract that information.
+
+### 6. Yearly and monthly mean
+
+From the variable 'LUFTTEMPERATUR' (air temperature), calculate the annual mean and the monthly mean air temperature (Jan to Dec). Assign the results to a vector.
+
+```{r}
+
+```
+
+Create a scatterplot of annual mean temperature (y-axis) versus measurement year (x-axis):
+
+```{r}
+
+```
+
+### 7. Write a function f_power()
+
+Write a function f_power(x) that takes a vector (x_1, x_2, ..., x_n) as input and returns a vector ((x_1)^1, (x_2)^2, ..., (x_n)^n). Try out your function with x=c(1:5,10:6).
+
+```{r}
+
+```
+
+### 8. Write a function f_moving_average()
+
+Write a function f_moving_average() that takes a vector (x_1, x_2, ..., x_n) as input and returns a vector of moving averages ( (x_1 + x_2 + x_3)/3, ...,  (x_n-2 + x_n-1 + x_n)/3). Try out your function with f_moving_average( c(1:5,6:1)).
+
+```{r}
+
+```
+
+### 9. Smoothing
+
+Smooth the time series of annual mean temperature (you created) using a moving average filter of length 11. Create a plot of the original time series together with the smoothed time series.
+
+```{r}
+
+```
+

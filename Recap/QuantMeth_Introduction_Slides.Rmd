@@ -92,7 +92,7 @@ The probabilities of each event are:
 
 While drawing a ball from the urn, we already feel that the ball is made of wood. What is the probability that it is red in color? Easy to calculate using the rule of conditional probabilities:
 
-$P(R|W) = \frac{P(R \cap W)}{P(W)} = \frac{\frac{4}{30}}{\frac{1}{3}} = 0.8$
+$P(R|W) = \frac{P(R \cap W)}{P(W)} = \frac{\frac{4}{30}}{\frac{1}{3}} = 0.4$
 
 # Random variable, sample, and sampling
 
@@ -224,59 +224,41 @@ ggplot(dat, aes(x = DBH, y = pdf)) +
 
 ```
 
-## Sample consistency
+## Sample consistency (accuracy)
 
-A sample is considered consistent if with increasing sample size the estimate approaches the true value (i.e., the estimate gets more accurate). 
+A sample is considered consistent if with increasing sample size the estimate approaches the true value (i.e., the estimate gets more accurate). If a sample is in-consistent, we speak of a sampling bias.
 
 Assume that we drew many samples with increasing sample size from a known population. We could estimate the mean and compare it to the 'true' mean.
 
-## Sample consistency
+## Sample consistency (accuracy)
 
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=8, fig.align='center'}
 
-pop <- rnorm(10000, 55, 15)
+pop <- rnorm(100000, 55, 15)
 
 x <- c()
 
-for (i in seq(10, 10000, 10)) {
+for (i in seq(10, 100000, 10)) {
   x <- c(x, mean(sample(pop, i)))
 }
 
-ggplot(data = data.frame(n = seq(10, 10000, 10),
+p1 <- ggplot(data = data.frame(n = seq(10, 100000, 10),
                          DBH = x), 
        aes(x = n, y = DBH)) +
   geom_point() +
   geom_hline(yintercept = mean(pop), col = "red", linetype = "dashed")
 
-```
-
-## Sample bias
-
-A sample is un-biased when the deviance between the estimated and the expecte value is zero. 
-
-Assume that we drew 10,000 samples (each n=150) from a known population and estimate the mean for each sample. Following, we calculated the difference between the known 'true' value and the estimate. The result yields following distribution.
-
-## Sample bias
-
-```{r echo=FALSE, results='asis', warning=FALSE, message=FALSE, fig.height=4, fig.width=4, fig.align='center'}
-
-pop <- rnorm(10000, 55, 15)
-
-x <- c()
-
-for (i in 1:10000) {
-  x <- c(x, mean(sample(pop, 150)))
-}
-
-ggplot(data = data.frame(x = x - mean(pop)), 
+p2 <- ggplot(data = data.frame(x = x - mean(pop)), 
        aes(x = x)) +
   geom_histogram() +
   geom_vline(xintercept = 0, col = "red", linetype = "dashed") +
   xlab("Estimate - 'true'")
 
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+
 ```
 
-## Sampling variance
+## Sampling variance (precision)
 
 The sampling variance indicates how precisely a sample estimate describes the population. Assume again that we drew many more samples from the same population (all with n = 150) and estimate the mean from each of those samples. The distribution of the sample means would look like this:
 
@@ -287,7 +269,7 @@ dbh_repeat_mean <- apply(dbh_repeat, 2, mean)
 ggplot(data.frame(x = dbh_repeat_mean), aes(x = x)) + geom_histogram()
 ```
 
-## Sampling variance
+## Sampling variance (precision)
 
 We now also take many more samples with n=15 and estimate the mean from each of those samples. The distribution of the sample means for n=15 would look like this:
 
@@ -306,9 +288,15 @@ p2 <- ggplot(data.frame(DBH = dbh_repeat2_mean), aes(x = DBH)) + geom_histogram(
 grid.arrange(p1, p2, ncol = 2)
 ```
 
+## Accuracy and precision
+
+<img src="accuracy_precision.png" alt="Drawing" style="width: 800px;"/>
+
 ## Standard errors
 
-This little experiment demonstrated us that we yield slightly different estimates each time we sample from a population! The variation in sampling means depends on the (population) variance and the sample size. We can calculate the variation in sampling means by:
+We yield slightly different estimates each time we sample from a population! 
+
+The variation in sampling means depends on the (population) variance and the sample size. We can calculate the variation in sampling means by:
 
 $SE = \frac{s}{\sqrt{n}}$
 
@@ -367,10 +355,6 @@ ggplot(data.frame(sample = 1:100, DBH = dbh_repeat_mean, ci = (dbh_repeat_sd / s
   ylim(30, 80)
 
 ```
-
-## Confidence interval
-
-Beware that precision and accuracy are two different things. Accuracy hereby is defined as the difference between an estimate and the 'true' value. Your estimate might be very precise, but not accurate. In turn, your estimate might be very accurate, but very unprecise.
 
 ## Confidence interval
 
