@@ -29,15 +29,12 @@ slide.backdrop {
 
 ## R classes
 
-Recall the most important object classes in R:
+Recall the object classes of last week:
 
 - vector
 - factor
-- matrix
-- data frame
-- list
 
-We already introduced you to vectors and factors. Today we will cover **matrix**, **data.frame** and **list** objects.
+Today we will cover **matrix**, **data.frame** and **list** objects.
 
 ## Matrices
 
@@ -128,7 +125,7 @@ l[[1]]
 l[[3]]
 ```
 
-## Why bother with lists now?
+## Why bother with lists?
 
 Nearly all functions (e.g., linear regression, generalised linear modelling, t-test, etc.) in R produce output that is stored in a list. The good news is that R contains various functions to extract required information (e.g., estimated values, p-values, etc.) and presents it in nice tables. However, sometimes it can be useful to extract information from the results directly OR you may want to use a list to return the output from your own functions.
 
@@ -376,6 +373,7 @@ In previously covered logical operations, single values were compared to vectors
 The `%in%` operator can be applied to two vectors: `x %in% y`. For each element in vector `x`, `%in%` evaluates if the element is contained in vector `y`. The operator returns a logical vector of the same lenght as vector `x`.
 
 The following example returns all rows of month June and July.
+
 ```{r}
 airquality_jun_jul <- airquality[airquality$Month %in% c(6, 7), ]
 ```

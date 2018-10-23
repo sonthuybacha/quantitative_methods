@@ -136,6 +136,8 @@ write.csv(dat, file = "Data/airquality2.csv", row.names = FALSE)
 
 Download the dataset 'treering.csv' from Moodle. Inspect it in either Excel or a text editor (Notepad++ for Windows or TextWrangler for Mac). Try loading the dataset into a data frame.
 
+The dataset contains the width of treerings measures at several plots.
+
 ```{r}
 treering <- read.table("Data/treering.csv", sep = ";", dec = ",", header = TRUE)
 ```
@@ -146,7 +148,7 @@ Drop all rows containing at least one `NA` value.
 treering_nomissing <- na.omit(treering)
 ```
 
-What is the mean increment (tree-ring width) for plot X40B?
+What is the mean tree-ring width for plot X40B?
 
 ```{r}
 mean(treering_nomissing$X40B)

@@ -10,7 +10,7 @@ output: html_document
 1. Complete the tasks. Write your R code in the designated areas (you can send the code to the console to test your code).
 2. Create an HTML file in R-Studio: | Menu | File | Knit Document (alternatively: little Knit button in script header)
 3. RENAME the file: lastname_assignment01.html
-4. Upload your assignment to Moodle
+4. Upload your assignment (.html file) to Moodle
 
 ### 1. Vectors (1 Point)
 
@@ -62,7 +62,7 @@ Extract the third column from matrix m.
 
 ```
 
-From matrix m, extract the element from the fourth row and second column,
+From matrix m, extract the element from the fourth row and second column.
 
 ```{r}
 
@@ -128,6 +128,8 @@ Write the data to a file called 'airquality2.csv' using scv format.
 
 Download the dataset 'treering.csv' from Moodle. Inspect it in either Excel or a text editor (Notepad++ for Windows or TextWrangler for Mac). Try loading the dataset into a data frame.
 
+The dataset contains the width of treerings measures at several plots.
+
 ```{r}
 
 ```
@@ -138,7 +140,7 @@ Drop all rows containing at least one `NA` value.
 
 ```
 
-What is the mean increment (tree-ring width) for plot X40B?
+What is the mean tree-ring width for plot X40B?
 
 ```{r}
 

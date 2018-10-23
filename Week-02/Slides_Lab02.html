@@ -105,7 +105,7 @@ slide.backdrop {
 }
 </style>
 
-<slide class=''><hgroup><h2>Goals of today&#39; session:</h2></hgroup><article  id="goals-of-today-session" class="smaller ">
+<slide class=""><hgroup><h2>Goals of today&#39; session:</h2></hgroup><article  id="goals-of-today-session" class="smaller ">
 
 <ul>
 <li>Matrices and data frames</li>
@@ -113,23 +113,20 @@ slide.backdrop {
 <li>Simple data manipulation</li>
 </ul>
 
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>Matrices and data frames</h2></hgroup><article  id="matrices-and-data-frames" class="smaller ">
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Matrices and data frames</h2></hgroup><article  id="matrices-and-data-frames" class="smaller ">
 
-</article></slide><slide class=''><hgroup><h2>R classes</h2></hgroup><article  id="r-classes" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>R classes</h2></hgroup><article  id="r-classes" class="smaller ">
 
-<p>Recall the most important object classes in R:</p>
+<p>Recall the object classes of last week:</p>
 
 <ul>
 <li>vector</li>
 <li>factor</li>
-<li>matrix</li>
-<li>data frame</li>
-<li>list</li>
 </ul>
 
-<p>We already introduced you to vectors and factors. Today we will cover <strong>matrix</strong>, <strong>data.frame</strong> and <strong>list</strong> objects.</p>
+<p>Today we will cover <strong>matrix</strong>, <strong>data.frame</strong> and <strong>list</strong> objects.</p>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices" class="smaller ">
 
 <p>A matrix is a two-dimensional <strong>Array</strong>. A matrix therefore has additional <strong>attributes</strong> specifiying the 2 dimensions: <strong>nrow</strong> und <strong>ncol</strong>.</p>
 
@@ -143,7 +140,7 @@ m</pre>
 
 <p>See: <code>dim(m)</code>, <code>nrow(m)</code>, <code>ncol(m)</code></p>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-1" class="smaller ">
 
 <p>By default the columns of the matrix will be filled first. If you want to fill the matrix by row, you can specify this with the <code>byrow</code> argument:</p>
 
@@ -155,7 +152,7 @@ n</pre>
 ## [2,]    4    5    6
 ## [3,]    7    8    9</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-2" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-2" class="smaller ">
 
 <p>You can apply mathematical operators to matrices the same way as vectors (Attention: Recycling rule!):</p>
 
@@ -173,7 +170,7 @@ n</pre>
 ## [2,]    8   25   48
 ## [3,]   21   48   81</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-3" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-3" class="smaller ">
 
 <p>Like with vectors, you can access elements of a matrix with indices, except that we now deal with two dimensions <code>[i,j]</code> or <code>[row, column]</code>:</p>
 
@@ -192,7 +189,7 @@ n</pre>
 
 <pre >## [1] 1 2 3</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-4" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-4" class="smaller ">
 
 <pre class = 'prettyprint lang-r'>m[1, 1]</pre>
 
@@ -208,7 +205,7 @@ n</pre>
 ## [1,]    1    7
 ## [2,]    2    8</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-5" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-5" class="smaller ">
 
 <p>When you exctract elements from a matrix, the result can belong to a different class!</p>
 
@@ -220,7 +217,7 @@ n</pre>
 
 <pre >## [1] &quot;integer&quot;</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-6" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-6" class="smaller ">
 
 <p>The functions <code>cbind()</code> und <code>rbind()</code> glue (bind) vectors and matrices together:</p>
 
@@ -232,7 +229,7 @@ cbind(m,n)</pre>
 ## [2,]    2    5    8    4    5    6
 ## [3,]    3    6    9    7    8    9</pre>
 
-</article></slide><slide class=''><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-7" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Matrices</h2></hgroup><article  id="matrices-7" class="smaller ">
 
 <p>The function <code>cbind</code> und <code>rbind</code> glue (bind) vectors and matrices together:</p>
 
@@ -247,7 +244,7 @@ rbind(m,n)</pre>
 ## [5,]    4    5    6
 ## [6,]    7    8    9</pre>
 
-</article></slide><slide class=''><hgroup><h2>Lists</h2></hgroup><article  id="lists" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Lists</h2></hgroup><article  id="lists" class="smaller ">
 
 <p>Lists are objectes that can store values of different data type (and different objects):</p>
 
@@ -263,11 +260,11 @@ rbind(m,n)</pre>
 
 <pre >## [1] &quot;a&quot;</pre>
 
-</article></slide><slide class=''><hgroup><h2>Why bother with lists now?</h2></hgroup><article  id="why-bother-with-lists-now" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Why bother with lists?</h2></hgroup><article  id="why-bother-with-lists" class="smaller ">
 
 <p>Nearly all functions (e.g., linear regression, generalised linear modelling, t-test, etc.) in R produce output that is stored in a list. The good news is that R contains various functions to extract required information (e.g., estimated values, p-values, etc.) and presents it in nice tables. However, sometimes it can be useful to extract information from the results directly OR you may want to use a list to return the output from your own functions.</p>
 
-</article></slide><slide class=''><hgroup><h2>Lists</h2></hgroup><article  id="lists-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Lists</h2></hgroup><article  id="lists-1" class="smaller ">
 
 <pre class = 'prettyprint lang-r'>class(l)</pre>
 
@@ -281,7 +278,7 @@ rbind(m,n)</pre>
 
 <pre >## [1] &quot;matrix&quot;</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames" class="smaller ">
 
 <p>A data frame is what you may call a data table. It is similar to a two-dimensional matrix but the columns can contain different data types.</p>
 
@@ -297,7 +294,7 @@ df</pre>
 ## 2   1002     Fir FALSE     21
 ## 3   1003    Pine  TRUE     26</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-1" class="smaller ">
 
 <p>The <code>summary()</code> function gives a quick overview. Helpful for spotting data entry errors and <code>NA</code>&#39;s:</p>
 
@@ -311,7 +308,7 @@ df</pre>
 ##  3rd Qu.:1002                              3rd Qu.:30.0  
 ##  Max.   :1003                              Max.   :34.0</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-2" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-2" class="smaller ">
 
 <p>You can index (access) columns using three main ways:</p>
 
@@ -327,7 +324,7 @@ df</pre>
 
 <pre >## [1] 1001 1002 1003</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-3" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-3" class="smaller ">
 
 <p>Rows are indexed by row number:</p>
 
@@ -345,7 +342,7 @@ df</pre>
 <pre >##   TREEID HEIGHT
 ## 1   1001     34</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-4" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data frames</h2></hgroup><article  id="data-frames-4" class="smaller ">
 
 <p>IMPORTANT: Extracting a row does not change the class but, extracting a column does!</p>
 
@@ -361,9 +358,9 @@ df</pre>
 
 <pre >## [1] &quot;integer&quot;</pre>
 
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>Data import and export</h2></hgroup><article  id="data-import-and-export" class="smaller ">
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Data import and export</h2></hgroup><article  id="data-import-and-export" class="smaller ">
 
-</article></slide><slide class=''><hgroup><h2>Data import</h2></hgroup><article  id="data-import" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data import</h2></hgroup><article  id="data-import" class="smaller ">
 
 <p>R can read a variety of dataset formats:</p>
 
@@ -376,7 +373,7 @@ df</pre>
 <li><a href='https://cran.r-project.org/doc/manuals/r-release/R-data.html' title=''>https://cran.r-project.org/doc/manuals/r-release/R-data.html</a></li>
 </ul>
 
-</article></slide><slide class=''><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files" class="smaller ">
 
 <p>Text (ASCII) files are a popular data storage and exchange format. They can be read on any OS platform and without specialty software (Notepad).</p>
 
@@ -384,7 +381,7 @@ df</pre>
 
 <p>BE AWARE: On German (and other) systems, the comma is already reserved for decimal places, so here the semi-colon or tab-separation is sometimes prefered. On English systems, the dot (<code>.</code>) is used for decimal places, on other systems it may be used to group digits for readability, e.g. <code>1,000,000</code>.</p>
 
-</article></slide><slide class=''><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-1" class="smaller ">
 
 <p>The <code>read.table()</code> function can be used to read table data from text files. The function allows several arguments to accomodate the different data formats. See <code>?read.table()</code></p>
 
@@ -398,7 +395,7 @@ df</pre>
 
 <pre class = 'prettyprint lang-r'>tab &lt;- read.table(&quot;Data/airquality.txt&quot;, sep = &quot;,&quot;, dec = &quot;.&quot;, header = TRUE)</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-2" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-2" class="smaller ">
 
 <p><code>read.table()</code> returns a data frame.</p>
 
@@ -417,11 +414,11 @@ df</pre>
 ## 2  2    36   118  8.0   72     5   2
 ## 3  3    12   149 12.6   74     5   3</pre>
 
-</article></slide><slide class=''><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-3" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data import: Text files</h2></hgroup><article  id="data-import-text-files-3" class="smaller ">
 
 <p><code>read.csv()</code> is a short-cut of <code>read.table()</code> text files with comma-separated columns.</p>
 
-</article></slide><slide class=''><hgroup><h2>Data export: Text files</h2></hgroup><article  id="data-export-text-files" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Data export: Text files</h2></hgroup><article  id="data-export-text-files" class="smaller ">
 
 <p>Export data frames to semi-colon delimited file:</p>
 
@@ -437,9 +434,9 @@ col.names = TRUE, qmethod = c(&quot;escape&quot;, &quot;double&quot;),
 fileEncoding = &quot;&quot;)
         </pre>
 
-</article></slide><slide class='segue dark nobackground level1'><hgroup class = 'auto-fadein'><h2>Simple data manipulation</h2></hgroup><article  id="simple-data-manipulation" class="smaller ">
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Simple data manipulation</h2></hgroup><article  id="simple-data-manipulation" class="smaller ">
 
-</article></slide><slide class=''><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values" class="smaller ">
 
 <p>Recall from last session that <code>NA</code> is used for missing values in R:</p>
 
@@ -454,7 +451,7 @@ x</pre>
 
 <pre >## [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</pre>
 
-</article></slide><slide class=''><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-1" class="smaller ">
 
 <p>It is not uncommon to have missing values in datasets, e.g. in data frames and matrices:</p>
 
@@ -469,7 +466,7 @@ df</pre>
 ## 4   NA    8
 ## 5    5   11</pre>
 
-</article></slide><slide class=''><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-2" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-2" class="smaller ">
 
 <p>Use <code>na.omit()</code> to ignore rows in a data frame that contain <code>NA</code>s:</p>
 
@@ -481,7 +478,7 @@ df</pre>
 ## 3   12    1
 ## 5    5   11</pre>
 
-</article></slide><slide class=''><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-3" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Missing values</h2></hgroup><article  id="missing-values-3" class="smaller ">
 
 <p>Also recall that arithmetic functions and operations applied to <code>NA</code>s return <code>NA</code></p>
 
@@ -499,7 +496,7 @@ df</pre>
 
 <pre >## [1] 21</pre>
 
-</article></slide><slide class=''><hgroup><h2>Text manipulation</h2></hgroup><article  id="text-manipulation" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Text manipulation</h2></hgroup><article  id="text-manipulation" class="smaller ">
 
 <p>Combine two or more character variables witht <code>paste()</code>:</p>
 
@@ -513,7 +510,7 @@ df</pre>
 
 <pre >## [1] &quot;llo Wo&quot;</pre>
 
-</article></slide><slide class=''><hgroup><h2>Subset columns of a data frame</h2></hgroup><article  id="subset-columns-of-a-data-frame" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Subset columns of a data frame</h2></hgroup><article  id="subset-columns-of-a-data-frame" class="smaller ">
 
 <p>It is best to extract columns from a data frame using the column names:</p>
 
@@ -525,7 +522,7 @@ df</pre>
 airquality_ozone &lt;- airquality[, &quot;Ozone&quot;]
 airquality_ozone_temp &lt;- airquality[, c(&quot;Ozone&quot;, &quot;Temp&quot;)]</pre>
 
-</article></slide><slide class=''><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame" class="smaller ">
 
 <p>Subset rows based using logical operations on variables (columns):</p>
 
@@ -541,7 +538,7 @@ nrow(airquality_zeile_10_100)</pre>
 
 <pre >## [1] 100</pre>
 
-</article></slide><slide class=''><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame-1" class="smaller ">
 
 <p>You can combine logical operators to make more complex subsets of rows and columns:</p>
 
@@ -555,7 +552,7 @@ nrow(airquality_zeile_10_100)</pre>
 
 <pre class = 'prettyprint lang-r'>ozone_juni_15 &lt;- airquality[airquality$Month == 6 &amp; airquality$Day == 15, &quot;Ozone&quot;]</pre>
 
-</article></slide><slide class=''><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame-2" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Subset rows of a data frame</h2></hgroup><article  id="subset-rows-of-a-data-frame-2" class="smaller ">
 
 <p>In previously covered logical operations, single values were compared to vectors or matices (or single values), e.g. <code>c(1,2,3) &lt; 2</code>.</p>
 
@@ -565,7 +562,7 @@ nrow(airquality_zeile_10_100)</pre>
 
 <pre class = 'prettyprint lang-r'>airquality_jun_jul &lt;- airquality[airquality$Month %in% c(6, 7), ]</pre>
 
-</article></slide><slide class=''><hgroup><h2>Create a new variable from existing variables</h2></hgroup><article  id="create-a-new-variable-from-existing-variables" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Create a new variable from existing variables</h2></hgroup><article  id="create-a-new-variable-from-existing-variables" class="smaller ">
 
 <p>Recall, the <code>$</code> operator is used to access columns in a data frame by name. You can also use it to create a new column:</p>
 
@@ -577,7 +574,7 @@ nrow(airquality_zeile_10_100)</pre>
 
 <pre class = 'prettyprint lang-r'>airquality$logOzone &lt;- log(airquality$Ozone)</pre>
 
-</article></slide><slide class=''><hgroup><h2>Create a factor variable from numeric variables</h2></hgroup><article  id="create-a-factor-variable-from-numeric-variables" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Create a factor variable from numeric variables</h2></hgroup><article  id="create-a-factor-variable-from-numeric-variables" class="smaller ">
 
 <p>The following example creates a factor (categorical) variable from temperature data:</p>
 
@@ -591,7 +588,7 @@ nrow(airquality_zeile_10_100)</pre>
 airquality[airquality$Temp &lt; 70 , &quot;TempClass&quot;] &lt;- &quot;cold&quot;
 airquality$TempClass &lt;- factor(airquality$TempClass)</pre>
 
-</article></slide><slide class=''><hgroup><h2>Create a factor variable from numeric variables</h2></hgroup><article  id="create-a-factor-variable-from-numeric-variables-1" class="smaller ">
+</article></slide><slide class=""><hgroup><h2>Create a factor variable from numeric variables</h2></hgroup><article  id="create-a-factor-variable-from-numeric-variables-1" class="smaller ">
 
 <p>The functino <code>cut</code> divides a numeric variable into intervals and codes them into factors (categorical data):</p>
 
