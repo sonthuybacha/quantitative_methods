@@ -1,7 +1,6 @@
 ---
 title: "Statistics in R"
-author: "Cornelius Senf"
-date: "cornelius.senf@geo.hu-berlin.de"
+author: "Cornelius Senf and Dirk Pflugmacher"
 output:
   ioslides_presentation:
     smaller: yes
@@ -129,7 +128,7 @@ Integrating an interaction between Temperature and Month, the equation would loo
 
 $log(Ozone) = \beta_0 + \beta_1Temp + \beta_2June + ... + \beta_5Sept + \beta_6(Temp:June) + ... + \beta_9(Temp:Sept) + \epsilon$
 
-The factors are always recoded into m-1 binary dummy variables, as the *base-level* is represented by the intercept and slope of of the regression line R picks the base-level alphabetically! 
+The factors are always recoded into m-1 binary dummy variables, as the *base-level* is represented by the intercept and slope of of the regression line. Note: R picks the base-level alphabetically! 
 
 ## Interactions categorical/continous variables
 
@@ -555,7 +554,7 @@ The result is a list of competing models:
 head(fit_all, n = 5)
 ```
 
-As we see, there are several models with $\Delta AIC < 4$. Hence, those models are equally likely give the data. Which one should we take as our 'true' mdoel?
+As we see, there are several models with $\Delta AIC < 4$. Hence, those models are equally likely given the data. Which one should we take as our 'true' mdoel?
 
 ## Model selection
 
@@ -567,4 +566,4 @@ model <- model_selection[[1]]
 model
 ```
 
-Any analyse it as shown in the previous slides.
+And analyse it as shown in the previous slides.
