@@ -1,7 +1,6 @@
 ---
 title: "Statistics in R"
-author: "Cornelius Senf"
-date: "cornelius.senf@geo.hu-berlin.de"
+author: "Cornelius Senf and Dirk Pflugmacher"
 output:
   ioslides_presentation:
     smaller: yes
@@ -28,7 +27,8 @@ library(tidyverse)
 
 - From LM to GLM
 - The GLM in R
-- Simulating data for assessing model fits
+- Log-linear model
+- Binomial model
 
 # Generalized linear models
 
@@ -94,7 +94,7 @@ Instead of transforming the response, we now define a link-function linking the 
 fit.glm <- glm(Ozone ~ Temp, data = na.omit(airquality), family = gaussian(link = "log"))
 ```
 
-The link-function is $g(\theta) = ln(\theta)$ and the inverse is $g^{-1}(\theta) = ln^{-1}(\theta) = e^{\theta}$. The data distribution is still assumed to be normal and the model can also be written as: 
+The link-function is $g(\theta) = ln(\theta)$ and the inverse is $g^{-1}(\theta) = e^{\theta}$. The data distribution is still assumed to be normal and the model can also be written as: 
 
 $y_i \sim N(exp(\bf{X_i}\beta), \sigma)$
 
