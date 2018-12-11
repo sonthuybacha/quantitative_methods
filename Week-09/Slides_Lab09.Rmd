@@ -1,7 +1,6 @@
 ---
 title: "Statistics in R"
-author: "Cornelius Senf"
-date: "cornelius.senf@geo.hu-berlin.de"
+author: "Cornelius Senf and Dirk Pflugmacher"
 output:
   ioslides_presentation:
     smaller: yes

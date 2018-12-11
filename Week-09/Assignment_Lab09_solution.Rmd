@@ -1,0 +1,70 @@
+---
+title: "Assignment 9"
+author: ""
+date: ""
+output: html_document
+---
+
+On Moodle you find a second data set on infested trees (infested2.csv). The data has 350 measuresments whether trees were infested with a bark beetle (coded as 1). The predictors of infestation are the anomaly in temperature and precipiatan (temp_anomaly and prec_anomaly), both given in standard deviation change from the mean (which is centered to zero). There is a third variable indicating whether the tree is located in a stand which was thinning to reduce competition.
+
+1. Build a full model (3 Points)
+
+Use the GLM function to build a full model (including interactions) explaining the probability of infestation from the three predictor variables:
+
+```{r}
+dat <- read.csv("Data/infestation2.csv")
+
+fit <- glm(infested ~ (temp_anomaly * prec_anomaly) * thinned, data = dat,
+           family = binomial(link = "logit"))
+```
+
+2. Find the most parcimonious model (3 Points)
+
+Use the `MuMIn::dredge()` function to identify and extract the most parcimonious model based on the AIC:
+
+```{r}
+library(MuMIn)
+
+options(na.action = "na.fail")
+
+fit_all <- dredge(fit)
+
+subset(fit_all, delta < 2)
+
+final_model <-get.models(fit_all, delta < 2)[[1]]
+```
+
+Tipp: you can extract a model from a MuMIn object using `MuMIn::get.models()`, which returns a list of model objects.
+
+3. Plot your model (4 Points)
+
+Plot the functional relationships between your predictors and the response (predicted infestation probability). Focus on potential interactions identified in you most parsimonious model, i.e. the interaction between temperature and precipitation anomaly; and/or thinning and temperature/precipitation anomaly. Create as many plots as necessary to explain the model. For each plot, write a short sentence explaining it's meaning.
+
+```{r}
+library(effects)
+library(tidyverse)
+
+summary(final_model)
+
+# Interaction Temperature/Precipitation
+
+eff_prec_temp <- effect("prec_anomaly:temp_anomaly", 
+                        mod = final_model,
+                        xlevels = list(prec_anomaly = seq(-2, 2, length.out = 100),
+                                       temp_anomaly = c(-2, 0, 2))) %>%
+  as.data.frame()
+
+ggplot(eff_prec_temp, aes(x = prec_anomaly, y = fit, col = factor(temp_anomaly))) +
+  geom_line()
+
+# Interaction precipitation/thinning
+
+eff_prec_temp <- effect("prec_anomaly:thinned", 
+                        mod = final_model,
+                        xlevels = list(prec_anomaly = seq(-2, 2, length.out = 100))) %>%
+  as.data.frame()
+
+ggplot(eff_prec_temp, aes(x = prec_anomaly, y = fit, col = factor(thinned))) +
+  geom_line()
+```
+
