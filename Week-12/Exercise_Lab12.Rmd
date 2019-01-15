@@ -1,0 +1,47 @@
+---
+title: "Exercise 16.01.2019"
+author: "Cornelius Senf and Dirk Pflugmacher"
+output: pdf_document
+---
+
+```{r echo=FALSE, hide=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
+## Overview
+
+In todays excercise, your goal is to explore and predict the climatic niche of Europes most important coniferous tree species (of the genus Picea (spruce), Pinus (pine) and Abis (fir)) by contrasting them to occurences of Europes most important broadleaved tree species (of the genus Fagus (beech), Acer (maple) and Quercus (oak)).
+
+## Data
+
+- Occurences of tree species of the genus pinus, picea, abis, fagus, acer and quercus as CSV file (species.csv)
+- BioClim data set (see http://www.worldclim.org/bioclim) clipped to Europe (bioclim.tif)
+
+## Products to be created
+
+- Descriptive graphs of the climate niche of coniferous and broadleaved tree species
+- A map of showing the probability of occurence for coniferous species (i.e., how likely is it for any pixel to contain a coniferous species over a broadleaved species)
+
+## Analysis steps
+
+- Perform a PCA on the bioclim dataset
+- Extract the BioClim components at all plot locations
+- Develop a model predicting the probability of any coniferous species occuring using the BioClim components as predictors
+- Apply the model to the PCA stack to map the probability across Europe
+
+## Tipps and hints
+
+- For calculating the PCA use a sample of 10,000 - 50.000 pixels, just as we did in last weeks course.
+- Choose only components that explain a substantial proportion of variation.
+- Extracting the PCA values at the plot locations can be achieved by: `raster::extract(stack, plots[, c("x", "y")])`.
+- Useful graphs for exploring the climat niche might include boxplots and histograms.
+- For exploration, group species among among genera (use the `tidyr::separate()` for doing so).
+- For modelling, recode genera as 'coniferous' or 'broadleaved'.
+- Think about the model (error distribution and link function) to use. Tipp: The response is coniferous (1) or not coniferous (0).
+
+## Submission
+
+Discuss problems in class. Ask only for help if you and your peers don't find a solution. You have to submit your solution (as html document created by using markdown) until next weeks session (23.01.2019).
+
+Good luck!
